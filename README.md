@@ -1,3 +1,12 @@
+![](https://img.shields.io/badge/Coolness-∞-brightgreen)
+![](https://img.shields.io/badge/ØWPM-80-yellow)
+![](https://img.shields.io/badge/Keyboard-QWERTZ-orange)
+![](https://img.shields.io/badge/Country-Austria-blueviolet)
+![](https://img.shields.io/badge/Level-yes-informational)
+![](https://img.shields.io/badge/Motivation-inactive-inactive)
+![](https://img.shields.io/badge/Coolness-∞-brightgreen)
+![](https://img.shields.io/badge/forgetful-don't_remember-critical)
+
 # 👋 Hi, I’m @trueberryless
 
 My name is Felix Schneider, I'm a software engineer currently studying at secondary college of engineering.
