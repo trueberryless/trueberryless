@@ -1,4 +1,3 @@
-![](https://img.shields.io/badge/Coolness-∞-brightgreen)
 ![](https://img.shields.io/badge/ØWPM-80-yellow)
 ![](https://img.shields.io/badge/Keyboard-QWERTZ-orange)
 ![](https://img.shields.io/badge/Country-Austria-blueviolet)
