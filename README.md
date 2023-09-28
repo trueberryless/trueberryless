@@ -40,6 +40,15 @@ If you really want to contact me, please just don't! 😎
 
 # 🚀 Some cool badges
 
+<a href="https://github.com/anuraghazra/github-readme-stats">
+  <img height=200 align="center" src="https://github-readme-stats.vercel.app/api?username=trueberryless" />
+</a>
+<a href="https://github.com/anuraghazra/convoychat">
+  <img height=200 align="center" src="https://github-readme-stats.vercel.app/api/top-langs?username=trueberryless&layout=compact&langs_count=8&card_width=320" />
+</a>
+<br/>
+<br/>
+
 [![@trueberryless Astro contributions](https://astro.badg.es/v2/contributor/trueberryless.svg)](https://astro.badg.es/contributor/trueberryless/)
 
 <!---
