@@ -40,9 +40,7 @@ If you really want to contact me, please just don't! 😎
 
 # 🚀 Some cool badges
 
-<a href="https://astro.badg.es/contributor/trueberryless/">
-  <img src="https://astro.badg.es/v2/contributor/trueberryless.svg" alt="@trueberryless Astro contributions" width="260" height="156">
-</a>
+[![@trueberryless Astro contributions](https://astro.badg.es/v2/contributor/trueberryless.svg)](https://astro.badg.es/contributor/trueberryless/)
 
 <!---
 trueberryless/trueberryless is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
