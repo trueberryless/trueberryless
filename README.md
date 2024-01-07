@@ -18,7 +18,13 @@ I've been studying programming skills for five years at a technical college and 
 # 🥷 Skills
 
 <p align="left">
-  <a
+  <a href="https://git-scm.com/" target="_blank" rel="noreferrer"
+    ><img
+      src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/git-colored.svg"
+      width="36"
+      height="36"
+      alt="Git" /></a
+  ><a
     href="https://docs.microsoft.com/en-us/dotnet/csharp/"
     target="_blank"
     rel="noreferrer"
@@ -27,12 +33,12 @@ I've been studying programming skills for five years at a technical college and 
       width="36"
       height="36"
       alt="C#" /></a
-  ><a href="https://git-scm.com/" target="_blank" rel="noreferrer"
+  ><a href="https://www.python.org/" target="_blank" rel="noreferrer"
     ><img
-      src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/git-colored.svg"
+      src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/python-colored.svg"
       width="36"
       height="36"
-      alt="Git" /></a
+      alt="Python" /></a
   ><a
     href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
     target="_blank"
@@ -42,18 +48,18 @@ I've been studying programming skills for five years at a technical college and 
       width="36"
       height="36"
       alt="JavaScript" /></a
-  ><a href="https://www.python.org/" target="_blank" rel="noreferrer"
-    ><img
-      src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/python-colored.svg"
-      width="36"
-      height="36"
-      alt="Python" /></a
   ><a href="https://www.typescriptlang.org/" target="_blank" rel="noreferrer"
     ><img
       src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/typescript-colored.svg"
       width="36"
       height="36"
       alt="TypeScript" /></a
+  ><a href="https://jquery.com/" target="_blank" rel="noreferrer"
+    ><img
+      src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/jquery-colored.svg"
+      width="36"
+      height="36"
+      alt="JQuery" /></a
   ><a
     href="https://developer.mozilla.org/en-US/docs/Glossary/HTML5"
     target="_blank"
@@ -63,18 +69,6 @@ I've been studying programming skills for five years at a technical college and 
       width="36"
       height="36"
       alt="HTML5" /></a
-  ><a href="https://angular.io/" target="_blank" rel="noreferrer"
-    ><img
-      src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/angularjs-colored.svg"
-      width="36"
-      height="36"
-      alt="Angular" /></a
-  ><a href="https://jquery.com/" target="_blank" rel="noreferrer"
-    ><img
-      src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/jquery-colored.svg"
-      width="36"
-      height="36"
-      alt="JQuery" /></a
   ><a href="https://www.w3.org/TR/CSS/#css" target="_blank" rel="noreferrer"
     ><img
       src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/css3-colored.svg"
@@ -99,6 +93,12 @@ I've been studying programming skills for five years at a technical college and 
       width="36"
       height="36"
       alt="Material UI" /></a
+  ><a href="https://angular.io/" target="_blank" rel="noreferrer"
+    ><img
+      src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/angularjs-colored.svg"
+      width="36"
+      height="36"
+      alt="Angular" /></a
   ><a href="https://graphql.org/" target="_blank" rel="noreferrer"
     ><img
       src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/graphql-colored.svg"
