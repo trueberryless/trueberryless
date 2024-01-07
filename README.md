@@ -4,9 +4,7 @@
 ![](https://img.shields.io/badge/Country-Austria-blueviolet)
 ![](https://img.shields.io/badge/Coolness-∞-brightgreen)
 
-# Hi ![](https://user-images.githubusercontent.com/18350557/176309783-0785949b-9127-417c-8b55-ab5a4333674e.gif)My name is Felix Schneider
-
-## C# Developer, Frontend Dev & Figma Designer
+# ![](https://user-images.githubusercontent.com/18350557/176309783-0785949b-9127-417c-8b55-ab5a4333674e.gif) Felix Schneider
 
 I've been studying programming skills for five years at a technical college and finished my thesis in collab with Siemens.
 
