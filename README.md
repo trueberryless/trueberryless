@@ -239,8 +239,13 @@ I've been studying programming skills for five years at a technical college and 
       src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/twitch.svg"
       width="32"
       height="32"
-    />
-  </a>
+    /></a>
+  <a href="https://linktr.ee/trueberryless" target="_blank" rel="noreferrer">
+    <img
+      src="https://api.blog.production.linktr.ee/wp-content/uploads/2022/06/Avatar-Symbol-Canopy.png"
+      width="32"
+      height="32"
+    /></a>
 </p>
 
 # 🚀 Badges
