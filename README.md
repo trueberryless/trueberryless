@@ -9,10 +9,10 @@
 I've been studying programming skills for five years at a technical college and finished my thesis in collab with Siemens.
 
 *   🌍  I'm based in Krems, Austria
-*   🖥️  See my website at [http://trueberryless.org](http://trueberryless.org)
+*   🖥️  See my website at [https://trueberryless.org](https://trueberryless.org)
 *   ✉️  You can contact me at [trueberryless+contact@gmail.com](mailto:trueberryless+contact@gmail.com)
-*   🚀  I'm currently working on [Mutanuq](http://mutanuq.trueberryless.org)
-*   🧠  I'm learning Angular
+*   🚀  I'm currently working on [True-Tracker](http://true-tracker.trueberryless.org)
+*   🧠  Self-learnt React skills
 *   🤝  I'm open to collaborating on open-source projects with educational purposes
 
 # 🥷 Skills
