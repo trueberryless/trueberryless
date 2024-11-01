@@ -1,0 +1,31 @@
+name: Update Currently Working On
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs every day at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Fetch currently working on data from gist
+        run: |
+          curl -s https://gist.githubusercontent.com/trueberryless/308965d7421e6c5f9f5ebb6d7a13ea26/raw/adc35c72c1b37fa939230cf41205cbf040fac214/currently-working-on.json > currently-working-on.json
+          echo "Gist content:"
+          cat currently-working-on.json
+
+      - name: Parse JSON and update README.md
+        id: update_readme
+        run: |
+          # Extract project name and link from JSON
+          PROJECT_NAME=$(jq -r '.name' currently-working-on.json)
+          PROJECT_LINK=$(jq -r '.link' currently-working-on.json)
+          
+          # Update README.md
+          sed -i '/currently working on/c\*   🚀  I'\''m currently working on ['"$PROJECT_NAME"']('"$PROJECT_LINK"')' README.md
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
