@@ -28,4 +28,7 @@ jobs:
           # Update README.md
           sed -i '/currently working on/c\*   🚀  I'\''m currently working on ['"$PROJECT_NAME"']('"$PROJECT_LINK"')' README.md
 
+      - name: Remove temporary JSON file
+        run: rm currently-working-on.json
+
       - uses: stefanzweifel/git-auto-commit-action@v5
