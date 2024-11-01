@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/badge/ØWPM-80-yellow)
 ![](https://img.shields.io/badge/Country-Austria-blueviolet)
-![](https://img.shields.io/badge/Coolness-look%20the%20stats%20bro-brightgreen)
+![](https://img.shields.io/badge/Coolness-look%20at%20the%20stats%20bro-brightgreen)
 
 # ![](https://user-images.githubusercontent.com/18350557/176309783-0785949b-9127-417c-8b55-ab5a4333674e.gif) Felix Schneider
 
