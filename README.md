@@ -252,6 +252,8 @@ I've been studying programming skills for five years at a technical college and 
 
 [![@trueberryless Astro contributions](https://astro.badg.es/v2/contributor/trueberryless.svg)](https://astro.badg.es/contributor/trueberryless/)
 
+[![roadmap.sh](https://roadmap.sh/card/wide/672cbb3f31d65c235d3e2235?variant=dark&roadmaps=frontend%2Cbackend%2Cdocker%2Ckubernetes)](https://roadmap.sh)
+
 <a href="https://github.com/anuraghazra/github-readme-stats">
   <img height=200 align="center" src="https://github-readme-stats.vercel.app/api?username=trueberryless" />
 </a>
