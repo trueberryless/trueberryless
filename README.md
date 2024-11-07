@@ -1,3 +1,9 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="github-snake-dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="github-snake.svg" />
+  <img alt="github-snake" src="github-snake.svg" />
+</picture>
+
 [![An image of @trueberryless's Holopin badges, which is a link to view their full Holopin profile](https://holopin.me/trueberryless)](https://holopin.io/@trueberryless)
 
 ![](https://img.shields.io/badge/ØWPM-80-yellow)
