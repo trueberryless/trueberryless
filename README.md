@@ -1,5 +1,5 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/<github_user>/<repository>/<target_branch>/github-snake-dark.svg" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/trueberryless/trueberryless/output/github-contribution-snake-dark.svg" />
   <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/<github_user>/<repository>/<target_branch>/github-snake.svg" />
   <img alt="github-snake" src="https://raw.githubusercontent.com/<github_user>/<repository>/<target_branch>/github-snake.svg" />
 </picture>
