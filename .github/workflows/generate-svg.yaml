@@ -1,0 +1,33 @@
+name: Generate Profile SVG
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/30 * * * *" # Updates every 30 minutes
+
+jobs:
+  generate-svg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Install Dependencies
+        run: |
+          npm init -y
+          npm install puppeteer @svgdom/core
+
+      - name: Generate SVG
+        run: node generate-svg.js
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add profile.svg
+          git commit -m "Update profile SVG" || exit 0
+          git push
