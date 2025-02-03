@@ -7,14 +7,18 @@
   <rect x="0" y="0" width="800" height="100" fill="black" fill-opacity="0.8"/>
   <text x="400" y="60" fill="white" font-size="24" font-family="Arial" text-anchor="middle">Felix Schneider</text>
   
-  <!-- Astro Contributor Badge -->
-  <image x="20" y="120" width="520" height="100" xlink:href="https://astro.badg.es/v2/contributor/trueberryless.svg"/>
-  
-  <!-- Spotify Now Playing -->
-  <image x="560" y="120" width="220" height="100" xlink:href="https://raw.githubusercontent.com/trueberryless/trueberryless/spotify/spotify.svg"/>
-  
-  <!-- GitHub Contribution Snake -->
-  <a xlink:href="https://github.com/Platane/snk">
-    <image x="20" y="240" width="760" height="180" xlink:href="https://raw.githubusercontent.com/trueberryless/trueberryless/snake/github-contribution-grid-snake.svg"/>
-  </a>
+  <g transform="translate(20,120)">
+    <!-- INLINE ASTRO START -->
+    <!-- INLINE ASTRO END -->
+  </g>
+
+  <g transform="translate(560,120)">
+    <!-- INLINE SPOTIFY START -->
+    <!-- INLINE SPOTIFY END -->
+  </g>
+
+  <g transform="translate(20,240)">
+    <!-- INLINE SNAKE START -->
+    <!-- INLINE SNAKE END -->
+  </g>
 </svg>
