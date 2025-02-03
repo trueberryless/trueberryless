@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <!-- Dark Background -->
+  <rect width="800" height="600" fill="#080b0f" rx="10" ry="10"/>
+  
+  <!-- Name Section (Full Width) -->
+  <g transform="translate(20, 20)">
+    <rect width="760" height="100" fill="#0d1117" rx="10" ry="10"/>
+    <text 
+      x="380" 
+      y="60" 
+      text-anchor="middle" 
+      font-family="Arial, sans-serif" 
+      font-size="24" 
+      fill="white"
+    >
+      Felix Schneider
+    </text>
+  </g>
+  
+  <!-- Astro Contributor Badge (2 columns) -->
+  <g transform="translate(20, 140)">
+    <rect width="520" height="200" fill="#0d1117" rx="10" ry="10"/>
+    <image 
+      x="10" 
+      y="10" 
+      width="500" 
+      height="180" 
+      href="https://astro.badg.es/v2/contributor/trueberryless.svg"
+      preserveAspectRatio="xMidYMid meet"
+    />
+  </g>
+  
+  <!-- Spotify Now Playing (1 column) -->
+  <g transform="translate(560, 140)">
+    <rect width="240" height="200" fill="#0d1117" rx="10" ry="10"/>
+    <image 
+      x="10" 
+      y="10" 
+      width="220" 
+      height="180" 
+      href="https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true"
+      preserveAspectRatio="xMidYMid slice"
+    />
+  </g>
+  
+  <!-- GitHub Snake Contribution (Full Width) -->
+  <g transform="translate(20, 360)">
+    <rect width="760" height="200" fill="#0d1117" rx="10" ry="10"/>
+    <image 
+      x="10" 
+      y="10" 
+      width="740" 
+      height="180" 
+      href="https://raw.githubusercontent.com/trueberryless/trueberryless/output/github-contribution-grid-snake-dark.svg"
+      preserveAspectRatio="xMidYMid slice"
+    />
+  </g>
+</svg>
