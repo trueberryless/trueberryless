@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bento Grid</title>
+    <style>
+      body {
+        background-color: #121212;
+        color: white;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        width: 800px;
+        padding: 20px;
+        background: #080b0f;
+        border-radius: 10px;
+      }
+      .box {
+        background: #0d1117;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+      }
+      img {
+        width: 100%;
+        border-radius: 10px;
+      }
+      .trueberryless {
+        background: url("./img/trueberryless.jpg") no-repeat center center/cover;
+        border-radius: 15px;
+        padding: 0;
+      }
+      .trueberryless > div {
+        position: relative;
+        border-radius: 10px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid">
+      <div class="box trueberryless" style="grid-column: span 3">
+        <div>
+          <h2>Felix Schneider</h2>
+        </div>
+      </div>
+      <div class="box" style="grid-column: span 2">
+        <img src="https://astro.badg.es/v2/contributor/trueberryless.svg" alt="Astro Contributor" />
+      </div>
+      <div class="box">
+        <img
+          src="https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true"
+          alt="Spotify Now Playing"
+        />
+      </div>
+      <div class="box" style="grid-column: span 3">
+        <a href="https://github.com/Platane/snk">
+          <picture>
+            <source
+              media="(prefers-color-scheme: dark)"
+              srcset="https://raw.githubusercontent.com/trueberryless/trueberryless/output/github-contribution-grid-snake-dark.svg"
+            />
+            <source
+              media="(prefers-color-scheme: light)"
+              srcset="https://raw.githubusercontent.com/trueberryless/trueberryless/output/github-contribution-grid-snake.svg"
+            />
+            <img
+              alt="github-snake"
+              src="https://raw.githubusercontent.com/trueberryless/trueberryless/output/github-contribution-grid-snake.svg"
+            />
+          </picture>
+        </a>
+      </div>
+    </div>
+  </body>
+</html>
