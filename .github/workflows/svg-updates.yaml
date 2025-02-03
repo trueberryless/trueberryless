@@ -43,8 +43,14 @@ jobs:
             # Escape slashes and newlines for safe replacement
             new_content=$(sed ':a;N;$!ba;s/\n/\\n/g' "$new_content_file")
 
-            # Use sed to replace content between markers
-            content=$(echo "$content" | sed -E "/$start_marker/,/$end_marker/{/$start_marker/{p;echo \"$new_content\";};/$end_marker/p;d;}")
+            # Use awk instead of sed to replace content between markers safely
+            content=$(awk -v start="$start_marker" -v end="$end_marker" -v new_content="$new_content" '
+              {
+                if ($0 ~ start) { print; print new_content; inside=1; next }
+                if ($0 ~ end) { inside=0 }
+                if (!inside) print
+              }
+            ' <<< "$content")
           }
 
           # Apply replacements
