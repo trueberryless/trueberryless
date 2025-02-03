@@ -1,20 +1,15 @@
-name: generate animation
+name: Update Snake SVG
 
 on:
-  # run automatically every 24 hours
   schedule:
     - cron: "50 23 * * *"
-
-  # allows to manually run the job at any time
   workflow_dispatch:
-
-  # run on every push on the main branch
   push:
     branches:
       - main
 
 jobs:
-  generate:
+  update-snake-svg:
     permissions:
       contents: write
     runs-on: ubuntu-latest
