@@ -27,7 +27,7 @@ jobs:
 
       - name: Inline SVG Contents
         run: |
-          MAIN_SVG="readme.svg" 
+          MAIN_SVG="html-wrapper.svg" 
           TEMP_FILE="temp/updated.svg"
 
           # Read the current SVG into memory
