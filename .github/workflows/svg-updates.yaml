@@ -23,8 +23,7 @@ jobs:
         run: |
           mkdir -p temp
           curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=121212&interchange=false&bar_color=53b14f&bar_color_cover=true" -o temp/spotify.svg
-          curl -L "https://astro.badg.es/v2/contributor/trueberryless.svg" -o temp/astro.svg
-          curl -L "https://raw.githubusercontent.com/trueberryless/trueberryless/snake/github-contribution-grid-snake.svg" -o temp/snake.svg
+          curl -L "https://raw.githubusercontent.com/trueberryless/trueberryless/snake/github-contribution-grid-snake-dark.svg" -o temp/snake.svg
 
       - name: Inline SVG Contents
         run: |
@@ -54,7 +53,6 @@ jobs:
           }
 
           # Apply replacements
-          replace_between_markers "<!-- INLINE ASTRO START -->" "<!-- INLINE ASTRO END -->" "temp/astro.svg"
           replace_between_markers "<!-- INLINE SPOTIFY START -->" "<!-- INLINE SPOTIFY END -->" "temp/spotify.svg"
           replace_between_markers "<!-- INLINE SNAKE START -->" "<!-- INLINE SNAKE END -->" "temp/snake.svg"
 
