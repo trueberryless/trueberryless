@@ -22,7 +22,7 @@ jobs:
       - name: Download External SVGs
         run: |
           mkdir -p temp
-          curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=false&bar_color=53b14f&bar_color_cover=true" -o temp/spotify.svg
+          curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true" -o temp/spotify.svg
           curl -L "https://raw.githubusercontent.com/trueberryless/trueberryless/snake/github-contribution-grid-snake-dark.svg" -o temp/snake.svg
 
       - name: Inline SVG Contents
