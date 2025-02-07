@@ -2,7 +2,7 @@ name: Update SVG with External Content
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
   push:
     branches:
@@ -13,20 +13,27 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download External SVGs
+      - name: Download Spotify SVG
         run: |
-          mkdir -p temp
-          curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true" -o temp/spotify.svg
-          curl -L "https://raw.githubusercontent.com/trueberryless/trueberryless/snake/github-contribution-grid-snake-dark.svg" -o temp/snake.svg
+          mkdir -p dist
+          curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=false&bar_color=53b14f&bar_color_cover=true" -o dist/spotify.svg
+
+      - name: Push Spotify SVG to the spotify branch
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: spotify
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Inline SVG Contents
         run: |
+          mkdir -p temp
           MAIN_SVG="html-wrapper.svg" 
           TEMP_FILE="temp/updated.svg"
 
@@ -53,8 +60,7 @@ jobs:
           }
 
           # Apply replacements
-          replace_between_markers "<!-- INLINE SPOTIFY START -->" "<!-- INLINE SPOTIFY END -->" "temp/spotify.svg"
-          replace_between_markers "<!-- INLINE SNAKE START -->" "<!-- INLINE SNAKE END -->" "temp/snake.svg"
+          replace_between_markers "<!-- INLINE SPOTIFY START -->" "<!-- INLINE SPOTIFY END -->" "dist/spotify.svg"
 
           # Write the final modified content back to the file
           echo "$content" > "$MAIN_SVG"
