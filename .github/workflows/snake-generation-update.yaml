@@ -1,4 +1,4 @@
-name: generate animation
+name: Generate and Update Snake SVG
 
 on:
   schedule:

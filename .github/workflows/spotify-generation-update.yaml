@@ -1,4 +1,4 @@
-name: Update SVG with External Content
+name: Generate and Update Spofity SVG
 
 on:
   schedule:
@@ -21,7 +21,7 @@ jobs:
       - name: Download Spotify SVG
         run: |
           mkdir -p dist
-          curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=false&bar_color=53b14f&bar_color_cover=true" -o dist/spotify.svg
+          curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true&bar_color=53b14f&bar_color_cover=true" -o dist/spotify.svg
 
       - name: Push Spotify SVG to the spotify branch
         uses: crazy-max/ghaction-github-pages@v3.1.0
