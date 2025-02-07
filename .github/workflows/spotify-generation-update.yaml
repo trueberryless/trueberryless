@@ -71,4 +71,5 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add html-wrapper.svg
           git commit -m "Auto-update SVG with inlined external content" || exit 0
+          git pull --rebase origin main
           git push origin main
