@@ -15,9 +15,9 @@
         <a href="https://open.spotify.com/user/pjyifjjapvah0yoy2zvd8vx0v?si=a8e21b0215cd4cd6">
           <!-- INLINE SPOTIFY START -->
 <html>
-<head><title>504 Gateway Time-out</title></head>
+<head><title>502 Bad Gateway</title></head>
 <body>
-<center><h1>504 Gateway Time-out</h1></center>
+<center><h1>502 Bad Gateway</h1></center>
 <hr><center>nginx/1.18.0 (Ubuntu)</center>
 </body>
 </html>
