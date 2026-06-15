@@ -1,5 +1,4 @@
-<!doctype html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -33,7 +32,13 @@
                 flex-direction: column;
                 justify-content: center;
             }
-            img {
+            .bento-img {
+                width: 100%;
+                border-radius: 10px;
+                display: block;
+            }
+            .box > svg,
+            .box > a > svg {
                 width: 100%;
                 border-radius: 10px;
                 display: block;
@@ -74,6 +79,7 @@
                 <div class="box">
                     <a href="https://astro.badg.es/contributor/trueberryless/">
                         <img
+                            class="bento-img"
                             src="https://astro.badg.es/v2/contributor/trueberryless.svg"
                             alt="Astro Contributor"
                             style="border-radius: 0"
@@ -83,6 +89,7 @@
                 <div class="box">
                     <a href="https://npmxers.trueberryless.org/trueberryless">
                         <img
+                            class="bento-img"
                             src="https://npmxers.trueberryless.org/_og/r/trueberryless.png"
                             alt="trueberryless npmxer profile"
                         />
@@ -91,33 +98,14 @@
             </div>
 
             <div class="box" style="grid-column: span 1">
-                <img
-                    src="https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true"
-                    alt="Spotify Now Playing"
-                />
+                <a
+                    href="https://open.spotify.com/user/pjyifjjapvah0yoy2zvd8vx0v?si=2f25a955da0b470f"
+                    >{{SPOTIFY_SVG}}</a
+                >
             </div>
 
             <div class="box" style="grid-column: span 2">
-                <a href="https://github.com/Platane/snk">
-                    <picture>
-                        <source
-                            media="(prefers-color-scheme: dark)"
-                            srcset="
-                                https://raw.githubusercontent.com/trueberryless/trueberryless/snake/github-contribution-grid-snake-dark.svg
-                            "
-                        />
-                        <source
-                            media="(prefers-color-scheme: light)"
-                            srcset="
-                                https://raw.githubusercontent.com/trueberryless/trueberryless/snake/github-contribution-grid-snake.svg
-                            "
-                        />
-                        <img
-                            alt="github-snake"
-                            src="https://raw.githubusercontent.com/trueberryless/trueberryless/snake/github-contribution-grid-snake.svg"
-                        />
-                    </picture>
-                </a>
+                <a href="https://github.com/Platane/snk">{{SNAKE_SVG}}</a>
             </div>
         </div>
     </body>
