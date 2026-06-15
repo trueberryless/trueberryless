@@ -63,11 +63,13 @@ async function build() {
   html = html.replace("{{SNAKE_SVG}}", snakeSvg);
   html = html.replace("{{SPOTIFY_SVG}}", spotifySvg);
 
-  const finalSvg = `<svg width="840" height="906" xmlns="http://www.w3.org/2000/svg">
+  let finalSvg = `<svg width="840" height="906" xmlns="http://www.w3.org/2000/svg">
     <foreignObject width="100%" height="100%">
         ${html}
     </foreignObject>
 </svg>`;
+
+  finalSvg = finalSvg.replace(/\s+/g, " ").replace(/>\s+</g, "><").trim();
 
   fs.writeFileSync(OUTPUT_SVG_PATH, finalSvg);
 }
