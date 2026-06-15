@@ -1,0 +1,35 @@
+name: Update Spotify and Grid
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  update-svg:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - run: |
+          mkdir -p dist
+          curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true&bar_color=53b14f&bar_color_cover=true" -o dist/spotify.svg
+
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: "24"
+
+      - run: pnpm install
+
+      - run: pnpm run build
+
+      - uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7
+        with:
+          commit_message: "chore: update spotify"
