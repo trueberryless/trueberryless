@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Download Spotify SVG
         run: |
@@ -24,7 +24,7 @@ jobs:
           curl -L "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true&bar_color=53b14f&bar_color_cover=true" -o dist/spotify.svg
 
       - name: Push Spotify SVG to the spotify branch
-        uses: crazy-max/ghaction-github-pages@v3.1.0
+        uses: crazy-max/ghaction-github-pages@c0d7ff0487ee0415efb7f32dab10ea880330b1dd # v3.1.0
         with:
           target_branch: spotify
           build_dir: dist
@@ -34,7 +34,7 @@ jobs:
       - name: Inline SVG Contents
         run: |
           mkdir -p temp
-          MAIN_SVG="html-wrapper.svg" 
+          MAIN_SVG="html-wrapper.svg"
           TEMP_FILE="temp/updated.svg"
 
           # Read the current SVG into memory
