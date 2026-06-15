@@ -33,6 +33,33 @@ async function build() {
 
   spotifySvg = spotifySvg.replace(/<a[^>]*>/g, "").replace(/<\/a>/g, "");
 
+  const felixPath = path.join(__dirname, "../src/img/felix.png");
+  const felixBase64 = fs.readFileSync(felixPath, "base64");
+  html = html.replace(
+    "./img/felix.png",
+    `data:image/png;base64,${felixBase64}`,
+  );
+
+  const astroRes = await fetch(
+    "https://astro.badg.es/v2/contributor/trueberryless.svg",
+  );
+  const astroBuffer = await astroRes.arrayBuffer();
+  const astroBase64 = Buffer.from(astroBuffer).toString("base64");
+  html = html.replace(
+    "https://astro.badg.es/v2/contributor/trueberryless.svg",
+    `data:image/svg+xml;base64,${astroBase64}`,
+  );
+
+  const npmxersRes = await fetch(
+    "https://npmxers.trueberryless.org/_og/r/trueberryless.png",
+  );
+  const npmxersBuffer = await npmxersRes.arrayBuffer();
+  const npmxersBase64 = Buffer.from(npmxersBuffer).toString("base64");
+  html = html.replace(
+    "https://npmxers.trueberryless.org/_og/r/trueberryless.png",
+    `data:image/png;base64,${npmxersBase64}`,
+  );
+
   html = html.replace("{{SNAKE_SVG}}", snakeSvg);
   html = html.replace("{{SPOTIFY_SVG}}", spotifySvg);
 
