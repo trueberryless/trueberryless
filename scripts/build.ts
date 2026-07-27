@@ -17,6 +17,17 @@ const SNAKE_URL =
 const SPOTIFY_URL =
   "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&background_color=0d1117&interchange=true&bar_color=53b14f&bar_color_cover=true";
 
+async function fetchWithRetry(url, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fetch(url);
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+
 async function build() {
   let html = fs.readFileSync(BENTO_HTML_PATH, "utf-8");
 
@@ -24,11 +35,11 @@ async function build() {
   if (fs.existsSync(LOCAL_SNAKE_PATH)) {
     snakeSvg = fs.readFileSync(LOCAL_SNAKE_PATH, "utf-8");
   } else {
-    const snakeRes = await fetch(SNAKE_URL);
+    const snakeRes = await fetchWithRetry(SNAKE_URL);
     snakeSvg = await snakeRes.text();
   }
 
-  const spotifyRes = await fetch(SPOTIFY_URL);
+  const spotifyRes = await fetchWithRetry(SPOTIFY_URL);
   let spotifySvg = await spotifyRes.text();
 
   spotifySvg = spotifySvg.replace(/<a[^>]*>/g, "").replace(/<\/a>/g, "");
@@ -40,7 +51,7 @@ async function build() {
     `data:image/png;base64,${felixBase64}`,
   );
 
-  const astroRes = await fetch(
+  const astroRes = await fetchWithRetry(
     "https://astro.badg.es/v2/contributor/trueberryless.svg",
   );
   const astroBuffer = await astroRes.arrayBuffer();
@@ -50,7 +61,7 @@ async function build() {
     `data:image/svg+xml;base64,${astroBase64}`,
   );
 
-  const npmxersRes = await fetch(
+  const npmxersRes = await fetchWithRetry(
     "https://npmxers.trueberryless.org/_og/r/trueberryless.png",
   );
   const npmxersBuffer = await npmxersRes.arrayBuffer();
