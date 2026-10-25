@@ -1,14 +1,38 @@
 {
-  "name": "readme",
+  "name": "trueberryless",
   "version": "0.0.0",
-  "type": "module",
   "private": true,
+  "homepage": "https://trueberryless.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/trueberryless/trueberryless/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trueberryless/trueberryless.git"
+  },
+  "license": "MIT",
+  "author": "trueberryless <trueberryless@gmail.com> (https://felixs.dev)",
+  "type": "module",
   "scripts": {
-    "build": "tsx scripts/build.ts"
+    "build": "tsx scripts/build.ts",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "knip": "knip",
+    "lint": "oxlint",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "pnpm build && playwright test"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "knip": "^6.39.0",
+    "oxlint": "^1.86.0",
     "tsx": "^4.7.1",
-    "typescript": "^5.3.3"
-  }
+    "typescript": "^5.3.3",
+    "vitest": "^5.0.3"
+  },
+  "packageManager": "pnpm@11.28.0"
 }
