@@ -1,11 +1,13 @@
 import { SNAKE_RATIO } from "./snake.ts";
 
 // Every card has an absolute position on one grid. The glass effect depends on it: each
-// card shows the slice of the blurred landscape that lies right behind it.
+// card shows the slice of the blurred landscape that lies right behind it. The animated
+// parts are drawn on top of the flattened image, so their positions are fixed here too.
 const WIDTH = 840;
 const INSET = 16;
 const GAP = 12;
 const INNER = WIDTH - INSET * 2;
+const CARD_RADIUS = 22;
 
 const HERO = rect(INSET, INSET, INNER, 236);
 const STATS_Y = bottom(HERO) + GAP;
@@ -25,13 +27,28 @@ const SNAKE = rect(
   Math.round(INNER * SNAKE_RATIO)
 );
 
+const NAME_PLATE_PADDING = 24;
+const NAME_PLATE_AVATAR = 108;
+const NAME_PLATE_HEIGHT = NAME_PLATE_AVATAR + NAME_PLATE_PADDING * 2;
+
+const MUSIC_PADDING = 22;
+const VINYL_SIZE = 196;
+// The record sticks out of the right edge of the card by a fifth of its size.
+const VINYL = rect(
+  MUSIC.x + MUSIC.width - Math.round(VINYL_SIZE * 0.78),
+  MUSIC.y + (MUSIC.height - VINYL_SIZE) / 2,
+  VINYL_SIZE,
+  VINYL_SIZE
+);
+const LABEL_HEIGHT = 16;
+
 export const LAYOUT = {
-  canvas: { height: bottom(SNAKE) + INSET, width: WIDTH },
   /** The Bluesky banner, sharp across the top and fading into the blurred backdrop. */
   banner: { height: WIDTH / 3, width: WIDTH },
+  canvas: { height: bottom(SNAKE) + INSET, width: WIDTH },
   // Concentric with the cards: the outer radius is the card radius plus the inset.
-  canvasRadius: 22 + INSET,
-  cardRadius: 22,
+  canvasRadius: CARD_RADIUS + INSET,
+  cardRadius: CARD_RADIUS,
   cards: {
     hero: HERO,
     music: MUSIC,
@@ -41,13 +58,28 @@ export const LAYOUT = {
     snake: SNAKE,
     stats: STATS,
   },
-  /** The glass name plate in the hero, relative to the canvas. */
-  namePlate: rect(WIDTH - INSET - 20 - 520, INSET + 236 - 20 - 138, 520, 138),
+  music: {
+    /** The top left corner of the equalizer, which sits in the label row. */
+    equalizer: { x: MUSIC.x + MUSIC_PADDING, y: MUSIC.y + MUSIC_PADDING + 1 },
+    labelHeight: LABEL_HEIGHT,
+    padding: MUSIC_PADDING,
+    textWidth: VINYL.x - MUSIC.x,
+    vinyl: VINYL,
+  },
+  namePlate: {
+    avatar: NAME_PLATE_AVATAR,
+    padding: NAME_PLATE_PADDING,
+    rect: rect(
+      WIDTH - INSET - 20 - 580,
+      INSET + HERO.height - 20 - NAME_PLATE_HEIGHT,
+      580,
+      NAME_PLATE_HEIGHT
+    ),
+  },
   sizes: {
-    avatar: { height: 92, width: 92 },
-    cover: { height: 232, width: 352 },
+    avatar: { height: NAME_PLATE_AVATAR, width: NAME_PLATE_AVATAR },
+    cover: { height: MUSIC.height, width: MUSIC.width },
     ownerAvatar: { height: 96, width: 96 },
-    vinyl: { height: 196, width: 196 },
   },
 } as const;
 

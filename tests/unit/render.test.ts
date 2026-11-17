@@ -2,60 +2,35 @@ import { describe, expect, test } from "vitest";
 
 import { createProfileData } from "../../src/data.ts";
 import { loadFonts } from "../../src/font.ts";
-import { toDataUri } from "../../src/image.ts";
-import {
-  deduplicateImages,
-  inlineAnimatedImages,
-  renderProfile,
-} from "../../src/render.ts";
+import { inlineSvg, renderProfile } from "../../src/render.ts";
 import { loadFixtureSources } from "../../src/sources.ts";
 
-describe("inlineAnimatedImages", () => {
-  test("inlines an animated SVG image and keeps its clipping", () => {
-    const animated = toDataUri(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><style>@keyframes a{}</style><rect/></svg>',
-      "image/svg+xml"
-    );
-
+describe("inlineSvg", () => {
+  test("places an SVG into the given rectangle and keeps its view box", () => {
     expect(
-      inlineAnimatedImages(
-        `<svg><image x="4" y="8" width="20" height="20" href="${animated}" clip-path="url(#c)"/></svg>`
+      inlineSvg(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -20 880 148"><rect/></svg>',
+        { height: 136, width: 808, x: 16, y: 860 }
       )
     ).toBe(
-      '<svg><g clip-path="url(#c)"><svg height="20" width="20" x="4" y="8" viewBox="0 0 10 10" preserveAspectRatio="xMidYMid meet"><style>@keyframes a{}</style><rect/></svg></g></svg>'
+      '<svg x="16" y="860" width="808" height="136" viewBox="-16 -20 880 148" preserveAspectRatio="xMidYMid meet"><rect/></svg>'
     );
   });
 
-  test("leaves static images alone", () => {
-    const image = `<image x="0" y="0" width="1" height="1" href="${toDataUri("<svg><rect/></svg>", "image/svg+xml")}"/>`;
-
-    expect(inlineAnimatedImages(image)).toBe(image);
-  });
-});
-
-describe("deduplicateImages", () => {
-  test("defines a repeated image once and keeps the clipping on a group", () => {
-    const href = "data:image/jpeg;base64,AAAA";
-
+  test("derives the view box from the size when there is none", () => {
     expect(
-      deduplicateImages(
-        `<svg width="9"><image x="1" y="2" width="4" height="4" href="${href}" preserveAspectRatio="none" clip-path="url(#a)"/><image x="5" y="6" width="8" height="8" href="${href}" preserveAspectRatio="none" mask="url(#b)"/></svg>`
-      )
-    ).toBe(
-      `<svg width="9"><defs><symbol id="image-0" viewBox="0 0 4 4" preserveAspectRatio="none"><image width="4" height="4" href="${href}" preserveAspectRatio="none"/></symbol></defs><g clip-path="url(#a)"><use href="#image-0" x="1" y="2" width="4" height="4"/></g><g mask="url(#b)"><use href="#image-0" x="5" y="6" width="8" height="8"/></g></svg>`
-    );
-  });
-
-  test("leaves images that appear once alone", () => {
-    const svg =
-      '<svg><image x="0" y="0" width="1" height="1" href="data:image/jpeg;base64,AAAA"/></svg>';
-
-    expect(deduplicateImages(svg)).toBe(svg);
+      inlineSvg('<svg width="18" height="14"><rect/></svg>', {
+        height: 14,
+        width: 18,
+        x: 1,
+        y: 2,
+      })
+    ).toContain('viewBox="0 0 18 14"');
   });
 });
 
 describe("renderProfile", () => {
-  test("renders the fixtures with animations inlined", async () => {
+  test("flattens the static parts and keeps the animations as vectors", async () => {
     const [data, fonts] = await Promise.all([
       loadFixtureSources().then(createProfileData),
       loadFonts(),
@@ -63,13 +38,16 @@ describe("renderProfile", () => {
 
     const svg = await renderProfile(data, "dark", fonts);
 
-    expect(data.music).toBeDefined();
-    expect(svg).toMatch(/^<svg width="840" height="\d+"/);
+    expect(svg).toMatch(
+      /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="840"/
+    );
     expect(svg).toContain(
       `<title id="title">${data.bluesky.displayName} (trueberryless) on GitHub</title>`
     );
+    expect(svg.match(/data:image\/webp;base64,/g)).toHaveLength(1);
     expect(svg).toContain("Generated with https://github.com/Platane/snk");
-    expect(svg).toContain("@keyframes sheen-move");
     expect(svg).not.toContain("<foreignObject");
-  }, 30_000);
+    expect(svg).not.toContain("<filter");
+    expect(svg).not.toContain("<mask");
+  }, 60_000);
 });

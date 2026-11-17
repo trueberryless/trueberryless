@@ -1,148 +1,111 @@
+import { Resvg } from "@resvg/resvg-js";
 import { createElement } from "react";
 import satori from "satori";
 import type { Font } from "satori";
+import sharp from "sharp";
 
 import type { ProfileData } from "./data.ts";
+import { EQUALIZER_SIZE, createEqualizerSvg } from "./equalizer.ts";
 import { GITHUB_LOGIN } from "./github.ts";
+import { toDataUri } from "./image.ts";
 import { LAYOUT } from "./layout.ts";
+import type { Rect } from "./layout.ts";
 import { Profile } from "./profile.tsx";
+import { cropSnake } from "./snake.ts";
 import { THEMES } from "./theme.ts";
 import type { ThemeName } from "./theme.ts";
+import { createVinylSvg } from "./vinyl.ts";
 
-const SVG_OPEN_TAG_RE = /^<svg([^>]*)>/;
-const SVG_IMAGE_RE =
-  /<image ([^>]*)href="data:image\/svg\+xml;base64,([^"]+)"([^>]*)\/>/g;
+// Twice the display size keeps text sharp on high density screens. GitHub shows the
+// profile at most 840 pixels wide, and smaller on phones.
+const RASTER_SCALE = 2;
+const WEBP_QUALITY = 84;
+
 const ATTRIBUTE_RE = /([a-zA-Z:-]+)="([^"]*)"/g;
 const ROOT_SVG_RE = /<svg([^>]*)>([\s\S]*)<\/svg>\s*$/;
-const IMAGE_RE = /<image ([^>]*?)href="(data:[^"]+)"([^>]*?)\/>/g;
-
-const KEPT_IMAGE_ATTRIBUTES = ["height", "width", "x", "y"] as const;
-const KEPT_ROOT_ATTRIBUTES = ["height", "viewBox", "width"] as const;
-const CLIPPING_ATTRIBUTES = ["clip-path", "mask"] as const;
 
 /**
- * Renders the profile into a single SVG. Satori lays the cards out with flexbox and turns
- * all text into paths, so the result looks the same everywhere and needs no fonts.
+ * Renders the profile into an SVG that stays smooth on slow devices. A browser repaints an
+ * SVG image as a whole on every animation frame, so everything static (glass, shadows,
+ * text and photos) is flattened into one WebP image, and only the snake, the spinning
+ * record and the equalizer stay vectors on top of it.
  */
 export async function renderProfile(
   data: ProfileData,
   themeName: ThemeName,
   fonts: Font[]
 ) {
-  const svg = await satori(
+  const { canvas } = LAYOUT;
+  const staticSvg = await satori(
     createElement(Profile, { data, theme: THEMES[themeName], themeName }),
-    { fonts, ...LAYOUT.canvas }
+    { fonts, ...canvas }
   );
+  const image = await rasterizeSvg(staticSvg);
+  const name = `${data.bluesky.displayName} (${GITHUB_LOGIN}) on GitHub`;
 
-  return addAccessibleName(
-    deduplicateImages(inlineAnimatedImages(svg)),
-    `${data.bluesky.displayName} (${GITHUB_LOGIN}) on GitHub`
-  );
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}" role="img" aria-labelledby="title">`,
+    `<title id="title">${escapeXml(name)}</title>`,
+    `<image href="${image}" width="${canvas.width}" height="${canvas.height}"/>`,
+    ...createAnimatedLayers(data, themeName),
+    "</svg>",
+  ].join("");
 }
 
-/**
- * Satori embeds an image once per use, and every glass card shows the same blurred
- * landscape. This defines each repeated image once and points every use at it, which
- * keeps the SVG a fraction of the size.
- */
-export function deduplicateImages(svg: string) {
-  const counts = new Map<string, number>();
-  for (const [, , href = ""] of svg.matchAll(IMAGE_RE)) {
-    counts.set(href, (counts.get(href) ?? 0) + 1);
+async function rasterizeSvg(svg: string) {
+  // Satori already turned all text into paths, so no fonts need to be loaded.
+  const png = new Resvg(svg, {
+    fitTo: { mode: "zoom", value: RASTER_SCALE },
+    font: { loadSystemFonts: false },
+  })
+    .render()
+    .asPng();
+  const webp = await sharp(png)
+    .webp({ effort: 6, quality: WEBP_QUALITY, smartSubsample: true })
+    .toBuffer();
+
+  return toDataUri(webp, "image/webp");
+}
+
+function createAnimatedLayers(data: ProfileData, themeName: ThemeName) {
+  const { cards, cardRadius, music: musicLayout } = LAYOUT;
+  const layers = [inlineSvg(cropSnake(data.snake[themeName]), cards.snake)];
+
+  const { music } = data;
+  if (music?.isPlaying) {
+    const { height, width, x, y } = cards.music;
+    // The record sticks out of the card, so it gets clipped to the card's rounded corners.
+    layers.push(
+      `<clipPath id="music-clip"><rect x="${x + 1}" y="${y + 1}" width="${width - 2}" height="${height - 2}" rx="${cardRadius - 1}"/></clipPath>`,
+      `<g clip-path="url(#music-clip)">${inlineSvg(createVinylSvg(music.cover, { isSpinning: true }), musicLayout.vinyl)}</g>`,
+      inlineSvg(createEqualizerSvg(THEMES[themeName].accent), {
+        ...EQUALIZER_SIZE,
+        ...musicLayout.equalizer,
+      })
+    );
   }
 
-  const symbols = new Map<string, string>();
-  const definitions: string[] = [];
-  const body = svg.replaceAll(
-    IMAGE_RE,
-    (image, before: string, href: string, after: string) => {
-      if ((counts.get(href) ?? 0) < 2) return image;
-
-      const attributes = parseAttributes(`${before} ${after}`);
-      let id = symbols.get(href);
-      if (!id) {
-        id = `image-${symbols.size}`;
-        symbols.set(href, id);
-        definitions.push(
-          `<symbol id="${id}" viewBox="0 0 ${attributes.width} ${attributes.height}" preserveAspectRatio="none"><image width="${attributes.width}" height="${attributes.height}" href="${href}" preserveAspectRatio="none"/></symbol>`
-        );
-      }
-
-      // The clipping moves to a wrapping group, because browsers resolve `clip-path` and
-      // `mask` on a `<use>` in the coordinate space of the referenced symbol.
-      const clipping = CLIPPING_ATTRIBUTES.filter((name) => attributes[name])
-        .map((name) => ` ${name}="${attributes[name]}"`)
-        .join("");
-
-      return `<g${clipping}><use href="#${id}"${stripAttributes(`${before} ${after}`, ["href", "preserveAspectRatio", ...CLIPPING_ATTRIBUTES])}/></g>`;
-    }
-  );
-
-  return definitions.length === 0
-    ? body
-    : body.replace(SVG_OPEN_TAG_RE, `$&<defs>${definitions.join("")}</defs>`);
+  return layers;
 }
 
-function stripAttributes(source: string, names: string[]) {
-  return [...source.matchAll(ATTRIBUTE_RE)]
-    .filter(([, name = ""]) => !names.includes(name))
-    .map(([attribute]) => ` ${attribute}`)
-    .join("");
-}
-
-/**
- * Browsers draw an SVG that sits in an `<image>` as a still frame, so the CSS animations of
- * the snake and the equalizer would never run. This moves every animated SVG image inline
- * and keeps the clip path and mask Satori created for it.
- */
-export function inlineAnimatedImages(svg: string) {
-  return svg.replaceAll(
-    SVG_IMAGE_RE,
-    (image, before: string, base64: string, after: string) => {
-      const source = Buffer.from(base64, "base64").toString("utf8");
-      const root = ROOT_SVG_RE.exec(source);
-      if (!source.includes("@keyframes") || !root) return image;
-
-      const [, rootAttributes = "", content = ""] = root;
-      const imageAttributes = parseAttributes(`${before} ${after}`);
-      const { height, viewBox, width } = parseAttributes(rootAttributes);
-
-      const position = KEPT_IMAGE_ATTRIBUTES.map(
-        (name) => `${name}="${imageAttributes[name] ?? 0}"`
-      ).join(" ");
-      const box = viewBox ?? `0 0 ${width} ${height}`;
-      const clipping = CLIPPING_ATTRIBUTES.filter(
-        (name) => imageAttributes[name]
-      )
-        .map((name) => `${name}="${imageAttributes[name]}"`)
-        .join(" ");
-
-      return `<g ${clipping}><svg ${position} viewBox="${box}" preserveAspectRatio="xMidYMid meet">${content}</svg></g>`;
-    }
-  );
-}
-
-function parseAttributes(source: string) {
-  const attributes: Record<string, string> = Object.create(null);
-  for (const [, name = "", value = ""] of source.matchAll(ATTRIBUTE_RE)) {
-    attributes[name] = value;
+/** Places an SVG document inside another one, filling the given rectangle. */
+export function inlineSvg(source: string, { height, width, x, y }: Rect) {
+  const root = ROOT_SVG_RE.exec(source);
+  if (!root) {
+    throw new Error("[profile] Could not find the root element of an SVG.");
   }
 
-  return attributes as Partial<
-    Record<
-      | (typeof KEPT_IMAGE_ATTRIBUTES)[number]
-      | (typeof KEPT_ROOT_ATTRIBUTES)[number]
-      | (typeof CLIPPING_ATTRIBUTES)[number],
-      string
-    >
-  >;
-}
-
-function addAccessibleName(svg: string, name: string) {
-  return svg.replace(
-    SVG_OPEN_TAG_RE,
-    `<svg$1 role="img" aria-labelledby="title"><title id="title">${escapeXml(name)}</title>`
+  const [, rootAttributes = "", content = ""] = root;
+  const attributes = new Map(
+    [...rootAttributes.matchAll(ATTRIBUTE_RE)].map(
+      ([, key = "", value = ""]) => [key, value]
+    )
   );
+  const viewBox =
+    attributes.get("viewBox") ??
+    `0 0 ${attributes.get("width")} ${attributes.get("height")}`;
+
+  return `<svg x="${x}" y="${y}" width="${width}" height="${height}" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet">${content}</svg>`;
 }
 
 function escapeXml(text: string) {

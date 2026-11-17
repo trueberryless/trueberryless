@@ -10,7 +10,7 @@ import type { ThemeName } from "./theme.ts";
 // The glass only shows a blurred backdrop, so a low resolution looks the same and keeps
 // the SVG small.
 const GLASS_SCALE = 0.5;
-const GLASS_BLUR = 22;
+const GLASS_BLUR = 30;
 
 /** Turns the raw sources into the data URIs and values the profile renders. */
 export async function createProfileData(

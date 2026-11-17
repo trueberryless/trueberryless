@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
 import type { Music, ProfileData } from "./data.ts";
-import { EQUALIZER_SIZE, createEqualizerSvg } from "./equalizer.ts";
+import { EQUALIZER_SIZE } from "./equalizer.ts";
 import { formatNumber, formatShortDate } from "./format.ts";
 import type { MergedPullRequest } from "./github.ts";
 import { createIconDataUri } from "./icon.ts";
@@ -9,8 +9,6 @@ import type { IconName } from "./icon.ts";
 import { toDataUri } from "./image.ts";
 import { LAYOUT } from "./layout.ts";
 import type { Rect } from "./layout.ts";
-import { createSheenSvg } from "./sheen.ts";
-import { cropSnake } from "./snake.ts";
 import type { Theme, ThemeName } from "./theme.ts";
 import { createVinylSvg } from "./vinyl.ts";
 
@@ -33,6 +31,15 @@ const ELLIPSIS: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
+const OWNER_GRID_COLUMNS = 3;
+const LARGEST_BUBBLE = 108;
+const SMALL_BUBBLE = { max: 54, min: 36 };
+
+/**
+ * Everything of the profile that doesn't move. It gets flattened into one image, and the
+ * animated parts (the snake, the spinning record and the equalizer) are drawn on top of
+ * it as vectors, so the browser only repaints a few shapes per frame.
+ */
 export function Profile({ data, theme, themeName }: ProfileProps) {
   const { canvas, canvasRadius, cards } = LAYOUT;
   const backdrop = data.backdrops[themeName];
@@ -71,7 +78,7 @@ export function Profile({ data, theme, themeName }: ProfileProps) {
       />
       <NamePlate data={data} glass={glass} />
       <Stats glass={glass} stats={data.github.stats} />
-      <MusicCard music={data.music} rect={cards.music} theme={theme} />
+      <MusicCard music={data.music} theme={theme} />
       <PullRequestsCard
         avatars={data.avatars}
         glass={glass}
@@ -83,16 +90,8 @@ export function Profile({ data, theme, themeName }: ProfileProps) {
         glass={glass}
         owners={data.github.topOwners}
       />
-      <Glass context={glass} rect={cards.snake}>
-        <Picture
-          src={toDataUri(cropSnake(data.snake[themeName]), "image/svg+xml")}
-          style={{ ...FULL, objectFit: "contain" }}
-        />
-      </Glass>
-      <Picture
-        src={toDataUri(createSheenSvg(canvas), "image/svg+xml")}
-        style={FULL}
-      />
+      {/* The snake itself is drawn on top of the flattened image. */}
+      <Glass context={glass} rect={cards.snake} tint={theme.solidTint} />
     </div>
   );
 }
@@ -105,24 +104,27 @@ function NamePlate({
   glass: GlassContext;
 }) {
   const { bluesky, github } = data;
+  const { avatar, padding, rect } = LAYOUT.namePlate;
   const { theme } = glass;
 
   return (
     <Glass
       context={glass}
-      rect={LAYOUT.namePlate}
-      style={{ alignItems: "center", gap: 22, padding: "0 24px" }}
+      rect={rect}
+      style={{ alignItems: "center", gap: 22, padding }}
     >
       <Picture
         src={data.avatar}
-        style={{
-          ...LAYOUT.sizes.avatar,
-          border: `3px solid ${theme.glassBorder}`,
-          borderRadius: 999,
-        }}
+        style={{ borderRadius: 999, height: avatar, width: avatar }}
       />
       <div
-        style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}
+        style={{
+          display: "flex",
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "center",
+          minWidth: 0,
+        }}
       >
         <span
           style={{
@@ -135,7 +137,15 @@ function NamePlate({
         >
           {bluesky.displayName}
         </span>
-        <span style={{ ...ELLIPSIS, color: theme.muted, fontSize: 15 }}>
+        <span
+          style={{
+            ...ELLIPSIS,
+            color: theme.muted,
+            fontSize: 15,
+            lineHeight: 1.2,
+            marginTop: 10,
+          }}
+        >
           {bluesky.description}
         </span>
         <div
@@ -143,61 +153,40 @@ function NamePlate({
             alignItems: "center",
             display: "flex",
             gap: 12,
-            marginTop: 6,
+            marginTop: 16,
           }}
         >
           <span
             style={{
+              alignItems: "center",
               backgroundColor: theme.pill,
               borderRadius: 999,
+              display: "flex",
               fontFamily: MONO_FONT,
               fontSize: 13,
-              padding: "4px 10px",
+              height: 28,
+              padding: "0 12px",
             }}
           >
             @{bluesky.handle}
           </span>
-          <Facepile
-            avatars={data.avatars}
-            logins={github.memberships}
-            theme={theme}
-          />
+          <div style={{ alignItems: "center", display: "flex", gap: 6 }}>
+            {github.memberships.map((login) => {
+              const organizationAvatar = data.avatars.get(login);
+              if (!organizationAvatar) return null;
+
+              return (
+                <Picture
+                  key={login}
+                  src={organizationAvatar}
+                  style={{ borderRadius: 999, height: 26, width: 26 }}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
     </Glass>
-  );
-}
-
-function Facepile({
-  avatars,
-  logins,
-  theme,
-}: {
-  avatars: Map<string, string>;
-  logins: string[];
-  theme: Theme;
-}) {
-  return (
-    <div style={{ alignItems: "center", display: "flex" }}>
-      {logins.map((login, index) => {
-        const avatar = avatars.get(login);
-        if (!avatar) return null;
-
-        return (
-          <Picture
-            key={login}
-            src={avatar}
-            style={{
-              border: `2px solid ${theme.glassBorder}`,
-              borderRadius: 999,
-              height: 28,
-              marginLeft: index === 0 ? 0 : -8,
-              width: 28,
-            }}
-          />
-        );
-      })}
-    </div>
   );
 }
 
@@ -277,41 +266,43 @@ function Stats({
 
 function MusicCard({
   music,
-  rect,
   theme,
 }: {
   music: Music | undefined;
-  rect: Rect;
   theme: Theme;
 }) {
   if (!music) return null;
 
-  const { vinyl } = LAYOUT.sizes;
-  const textWidth = rect.width - vinyl.width * 0.78;
+  const { cards } = LAYOUT;
+  const { labelHeight, padding, textWidth, vinyl } = LAYOUT.music;
 
   return (
-    <Card rect={rect} theme={theme}>
+    <Card rect={cards.music} theme={theme}>
       <Picture src={music.background} style={FULL} />
       <div style={{ ...FULL, backgroundImage: theme.scrim, display: "flex" }} />
-      <Picture
-        src={toDataUri(
-          createVinylSvg(music.cover, { isSpinning: music.isPlaying }),
-          "image/svg+xml"
-        )}
-        style={{
-          ...vinyl,
-          left: textWidth,
-          position: "absolute",
-          top: (rect.height - vinyl.height) / 2,
-        }}
-      />
+      {/* A playing record spins on top of the flattened image, a paused one stays here. */}
+      {music.isPlaying ? null : (
+        <Picture
+          src={toDataUri(
+            createVinylSvg(music.cover, { isSpinning: false }),
+            "image/svg+xml"
+          )}
+          style={{
+            height: vinyl.height,
+            left: vinyl.x - cards.music.x,
+            position: "absolute",
+            top: vinyl.y - cards.music.y,
+            width: vinyl.width,
+          }}
+        />
+      )}
       <div
         style={{
           alignSelf: "stretch",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: 22,
+          padding,
           position: "relative",
           width: textWidth,
         }}
@@ -324,13 +315,12 @@ function MusicCard({
             fontSize: 13,
             fontWeight: 600,
             gap: 8,
+            height: labelHeight,
           }}
         >
+          {/* Keeps room for the equalizer, which is drawn on top. */}
           {music.isPlaying ? (
-            <Picture
-              src={toDataUri(createEqualizerSvg(theme.accent), "image/svg+xml")}
-              style={EQUALIZER_SIZE}
-            />
+            <div style={{ ...EQUALIZER_SIZE, display: "flex" }} />
           ) : null}
           {music.isPlaying ? "Now playing" : "Last played"}
         </div>
@@ -408,15 +398,14 @@ function PullRequestsCard({
                   style={{
                     alignItems: "center",
                     backgroundColor: theme.merged,
-                    border: `2px solid ${theme.glassBorder}`,
                     borderRadius: 999,
-                    bottom: -5,
+                    bottom: -4,
                     display: "flex",
-                    height: 18,
+                    height: 17,
                     justifyContent: "center",
                     position: "absolute",
-                    right: -5,
-                    width: 18,
+                    right: -4,
+                    width: 17,
                   }}
                 >
                   <Picture
@@ -472,40 +461,63 @@ function OwnersCard({
   const [first, ...rest] = owners;
   if (!first) return null;
 
+  const rows = [
+    rest.slice(0, OWNER_GRID_COLUMNS),
+    rest.slice(OWNER_GRID_COLUMNS, OWNER_GRID_COLUMNS * 2),
+  ].filter((row) => row.length > 0);
+
   return (
     <Glass
       context={glass}
       rect={LAYOUT.cards.owners}
-      style={{ flexDirection: "column", padding: "16px 20px" }}
+      style={{ flexDirection: "column", gap: 16, padding: 20 }}
     >
-      <span style={{ color: theme.muted, fontSize: 13 }}>
+      <span style={{ color: theme.muted, fontSize: 13, lineHeight: 1.2 }}>
         merged pull requests by project owner
       </span>
-      <div style={{ alignItems: "center", display: "flex", flex: 1, gap: 18 }}>
+      <div style={{ alignItems: "center", display: "flex", flex: 1, gap: 20 }}>
         <Bubble
           avatar={avatars.get(first.login)}
           count={first.mergedPullRequests}
-          size={getBubbleSize(first, first)}
+          size={LARGEST_BUBBLE}
           theme={theme}
         />
         <div
           style={{
-            alignItems: "center",
             display: "flex",
             flex: 1,
-            flexWrap: "wrap",
-            gap: 14,
-            justifyContent: "center",
+            flexDirection: "column",
+            height: "100%",
+            justifyContent: "space-around",
           }}
         >
-          {rest.map((owner) => (
-            <Bubble
-              avatar={avatars.get(owner.login)}
-              count={owner.mergedPullRequests}
-              key={owner.login}
-              size={getBubbleSize(owner, first)}
-              theme={theme}
-            />
+          {rows.map((row) => (
+            <div key={row[0]?.login} style={{ display: "flex" }}>
+              {/* Empty cells keep a short row aligned with the columns above it. */}
+              {Array.from({ length: OWNER_GRID_COLUMNS }, (_, index) => {
+                const owner = row[index];
+
+                return (
+                  <div
+                    key={owner?.login ?? `empty-${index}`}
+                    style={{
+                      display: "flex",
+                      flex: 1,
+                      justifyContent: "center",
+                    }}
+                  >
+                    {owner ? (
+                      <Bubble
+                        avatar={avatars.get(owner.login)}
+                        count={owner.mergedPullRequests}
+                        size={getBubbleSize(owner, first)}
+                        theme={theme}
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
           ))}
         </div>
       </div>
@@ -531,12 +543,7 @@ function Bubble({
       {avatar ? (
         <Picture
           src={avatar}
-          style={{
-            border: `2px solid ${theme.glassBorder}`,
-            borderRadius: 999,
-            height: size,
-            width: size,
-          }}
+          style={{ borderRadius: 999, height: size, width: size }}
         />
       ) : (
         <div
@@ -566,7 +573,8 @@ function Bubble({
   );
 }
 
-// Areas grow with the count, so the diameter grows with its square root.
+// Areas grow with the count, so the diameter grows with its square root. The smaller
+// bubbles share a grid, so their size is capped to fit a cell.
 function getBubbleSize(
   owner: { mergedPullRequests: number },
   largest: { mergedPullRequests: number }
@@ -575,7 +583,10 @@ function getBubbleSize(
     owner.mergedPullRequests / largest.mergedPullRequests
   );
 
-  return Math.round(36 + (108 - 36) * ratio);
+  return Math.min(
+    SMALL_BUBBLE.max,
+    Math.round(SMALL_BUBBLE.min + (LARGEST_BUBBLE - SMALL_BUBBLE.min) * ratio)
+  );
 }
 
 function ImageCard({
@@ -595,7 +606,7 @@ function ImageCard({
 }
 
 /** A card with a frosted glass background that shows the blurred landscape behind it. */
-function Glass({ children, context, rect, style }: GlassProps) {
+function Glass({ children, context, rect, style, tint }: GlassProps) {
   const { canvas } = LAYOUT;
   const { image, theme } = context;
 
@@ -606,12 +617,9 @@ function Glass({ children, context, rect, style }: GlassProps) {
         style={{ ...canvas, left: -rect.x, position: "absolute", top: -rect.y }}
       />
       <div
-        style={{ ...FULL, backgroundColor: theme.glassTint, display: "flex" }}
-      />
-      <div
         style={{
           ...FULL,
-          backgroundImage: theme.glassHighlight,
+          backgroundColor: tint ?? theme.glassTint,
           display: "flex",
         }}
       />
@@ -660,7 +668,7 @@ function Card({
 }
 
 function Picture({ src, style }: { src: string; style: CSSProperties }) {
-  // oxlint-disable-next-line jsx-a11y/alt-text -- Satori draws this into an SVG, where the README's `alt` describes the image.
+  // oxlint-disable-next-line jsx-a11y/alt-text -- Satori draws this into an image, where the README's `alt` describes it.
   return <img src={src} style={{ objectFit: "cover", ...style }} />;
 }
 
@@ -677,8 +685,10 @@ interface GlassContext {
 }
 
 interface GlassProps {
-  children: ReactNode;
+  children?: ReactNode;
   context: GlassContext;
   rect: Rect;
   style?: CSSProperties;
+  /** Overrides the tint, e.g. a more opaque one behind content that needs contrast. */
+  tint?: string;
 }
