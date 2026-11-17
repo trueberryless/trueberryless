@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
-import { parseGitHubActivity } from "../../src/github.ts";
-import type { GraphQLData } from "../../src/github.ts";
+import { getAvatarLogins, parseGitHubActivity } from "../../src/github.ts";
+import type { GitHubData } from "../../src/github.ts";
 
 describe("parseGitHubActivity", () => {
   test("maps the stats", () => {
@@ -14,49 +14,92 @@ describe("parseGitHubActivity", () => {
   });
 
   test("keeps the four most recently merged pull requests", () => {
-    const { pullRequests } = parseGitHubActivity(
+    const { latestPullRequests } = parseGitHubActivity(
       createData([
-        "2026-11-10",
-        "2026-11-17",
-        "2026-11-12",
-        "2026-11-01",
-        "2026-11-15",
+        ["withastro", "2026-11-10"],
+        ["withastro", "2026-11-17"],
+        ["npmx-dev", "2026-11-12"],
+        ["withastro", "2026-11-01"],
+        ["bombshell-dev", "2026-11-15"],
       ])
     );
 
-    expect(pullRequests.map(({ mergedAt }) => mergedAt)).toEqual([
-      "2026-11-17",
-      "2026-11-15",
-      "2026-11-12",
-      "2026-11-10",
+    expect(
+      latestPullRequests.map(({ mergedAt, owner }) => `${owner} ${mergedAt}`)
+    ).toEqual([
+      "withastro 2026-11-17",
+      "bombshell-dev 2026-11-15",
+      "npmx-dev 2026-11-12",
+      "withastro 2026-11-10",
     ]);
   });
 
-  test("skips search results that are not pull requests", () => {
-    const data = createData(["2026-11-17"]);
-    data.latest.nodes.push({});
+  test("counts merged pull requests by owner", () => {
+    const { topOwners } = parseGitHubActivity(
+      createData([
+        ["npmx-dev", "2026-11-01"],
+        ["withastro", "2026-11-02"],
+        ["withastro", "2026-11-03"],
+        ["bombshell-dev", "2026-11-04"],
+      ])
+    );
 
-    expect(parseGitHubActivity(data).pullRequests).toHaveLength(1);
+    expect(topOwners).toEqual([
+      { login: "withastro", mergedPullRequests: 2 },
+      { login: "bombshell-dev", mergedPullRequests: 1 },
+      { login: "npmx-dev", mergedPullRequests: 1 },
+    ]);
+  });
+
+  test("leaves out personal organizations from the memberships", () => {
+    const data = createData([]);
+    data.organizations = [
+      { login: "npmx-dev" },
+      { login: "trueberryless-org" },
+    ];
+
+    expect(parseGitHubActivity(data).memberships).toEqual(["npmx-dev"]);
   });
 });
 
-function createData(mergedDates: string[]): GraphQLData {
+describe("getAvatarLogins", () => {
+  test("lists every shown login once", () => {
+    const activity = parseGitHubActivity({
+      ...createData([
+        ["withastro", "2026-11-01"],
+        ["npmx-dev", "2026-11-02"],
+      ]),
+      organizations: [{ login: "npmx-dev" }, { login: "nuxt" }],
+    });
+
+    expect(getAvatarLogins(activity)).toEqual([
+      "npmx-dev",
+      "nuxt",
+      "withastro",
+    ]);
+  });
+});
+
+function createData(
+  pullRequests: Array<[owner: string, mergedAt: string]>
+): GitHubData {
   return {
-    latest: {
-      nodes: mergedDates.map((mergedAt, index) => ({
-        mergedAt,
-        number: index + 1,
-        repository: { nameWithOwner: "withastro/starlight" },
-        title: `Pull request ${index + 1}`,
-      })),
-    },
-    merged: { issueCount: 1211 },
-    reviewed: { issueCount: 974 },
-    user: {
-      contributionsCollection: {
-        contributionCalendar: { totalContributions: 3079 },
+    organizations: [],
+    pullRequests: pullRequests.map(([owner, mergedAt], index) => ({
+      mergedAt,
+      number: index + 1,
+      repository: { name: "repo", owner: { login: owner } },
+      title: `Pull request ${index + 1}`,
+    })),
+    stats: {
+      merged: { issueCount: 1211 },
+      reviewed: { issueCount: 974 },
+      user: {
+        contributionsCollection: {
+          contributionCalendar: { totalContributions: 3079 },
+        },
+        repositoriesContributedTo: { totalCount: 89 },
       },
-      repositoriesContributedTo: { totalCount: 89 },
     },
   };
 }

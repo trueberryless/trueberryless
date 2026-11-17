@@ -1,34 +1,72 @@
 {
-  "pullRequests": [
+  "latestPullRequests": [
     {
       "mergedAt": "2026-11-17T09:46:03Z",
       "number": 4410,
-      "repository": "withastro/starlight",
+      "owner": "withastro",
+      "repository": "starlight",
       "title": "i18n(de): improve site-search and plugins"
     },
     {
       "mergedAt": "2026-11-16T16:38:48Z",
       "number": 1,
-      "repository": "bombshell-dev/template",
+      "owner": "bombshell-dev",
+      "repository": "template",
       "title": "chore: pin automation action"
     },
     {
       "mergedAt": "2026-11-16T16:38:14Z",
       "number": 18,
-      "repository": "bombshell-dev/args",
+      "owner": "bombshell-dev",
+      "repository": "args",
       "title": "chore: pin automation action"
     },
     {
       "mergedAt": "2026-11-16T15:44:08Z",
       "number": 1237,
-      "repository": "all-contributors/allcontributors.org",
+      "owner": "all-contributors",
+      "repository": "allcontributors.org",
       "title": "docs(app): rewrite getting started"
     }
+  ],
+  "memberships": [
+    "nuxt",
+    "all-contributors",
+    "bombshell-dev",
+    "withstudiocms",
+    "npmx-dev",
+    "singi-labs"
   ],
   "stats": {
     "contributedRepositories": 89,
     "contributions": 3079,
     "mergedPullRequests": 1211,
     "reviewedPullRequests": 974
-  }
+  },
+  "topOwners": [
+    {
+      "login": "withastro",
+      "mergedPullRequests": 354
+    },
+    {
+      "login": "npmx-dev",
+      "mergedPullRequests": 46
+    },
+    {
+      "login": "danielroe",
+      "mergedPullRequests": 32
+    },
+    {
+      "login": "withstudiocms",
+      "mergedPullRequests": 26
+    },
+    {
+      "login": "all-contributors",
+      "mergedPullRequests": 18
+    },
+    {
+      "login": "bombshell-dev",
+      "mergedPullRequests": 18
+    }
+  ]
 }

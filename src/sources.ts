@@ -1,15 +1,22 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 
-import { ASTRO_BADGE_URL } from "./astro.ts";
-import { GITHUB_LOGIN, fetchGitHubActivity } from "./github.ts";
+import { fetchBlueskyProfile } from "./bluesky.ts";
+import type { BlueskyProfile } from "./bluesky.ts";
+import {
+  GITHUB_LOGIN,
+  fetchGitHubActivity,
+  getAvatarLogins,
+} from "./github.ts";
 import type { GitHubActivity } from "./github.ts";
 import { fetchBuffer } from "./image.ts";
 import { SPOTIFY_WIDGET_URL } from "./spotify.ts";
 import type { ThemeName } from "./theme.ts";
 
 const FIXTURES_DIR = new URL("../fixtures/", import.meta.url);
-const SNAKE_OUTPUT_BRANCH_URL = `https://raw.githubusercontent.com/${GITHUB_LOGIN}/${GITHUB_LOGIN}/output/`;
+const AVATARS_DIR = new URL("avatars/", FIXTURES_DIR);
+const OUTPUT_BRANCH_URL = `https://raw.githubusercontent.com/${GITHUB_LOGIN}/${GITHUB_LOGIN}/output/`;
+const AVATAR_EXTENSION = ".png";
 
 // The file names `Platane/snk` writes in the update workflow. A local live build without
 // them falls back to the files published on the `output` branch.
@@ -19,8 +26,9 @@ const SNAKE_FILES = {
 } satisfies Record<ThemeName, string>;
 
 const FIXTURE_FILES = {
-  astroBadge: "astro-badge.svg",
-  avatar: "avatar.png",
+  banner: "banner.jpg",
+  bluesky: "bluesky.json",
+  blueskyAvatar: "bluesky-avatar.jpg",
   github: "github.json",
   npmxCard: "npmx-card.png",
   snakeDark: "snake-dark.svg",
@@ -43,27 +51,26 @@ export async function fetchLiveSources(
     );
   }
 
-  const [
-    github,
-    spotifyWidget,
-    astroBadge,
-    npmxCard,
-    avatar,
-    snakeDark,
-    snakeLight,
-  ] = await Promise.all([
-    fetchGitHubActivity(token),
-    fetchBuffer(SPOTIFY_WIDGET_URL).then(String),
-    fetchBuffer(ASTRO_BADGE_URL).then(String),
-    fetchBuffer(`https://npmxers.netlify.app/_og/r/${GITHUB_LOGIN}.png`),
-    fetchBuffer(`https://github.com/${GITHUB_LOGIN}.png?size=256`),
-    readSnake(snakeDir, SNAKE_FILES.dark),
-    readSnake(snakeDir, SNAKE_FILES.light),
+  const [github, bluesky, spotifyWidget, npmxCard, snakeDark, snakeLight] =
+    await Promise.all([
+      fetchGitHubActivity(token),
+      fetchBlueskyProfile(),
+      fetchBuffer(SPOTIFY_WIDGET_URL).then(String),
+      fetchBuffer(`https://npmxers.netlify.app/_og/r/${GITHUB_LOGIN}.png`),
+      readSnake(snakeDir, SNAKE_FILES.dark),
+      readSnake(snakeDir, SNAKE_FILES.light),
+    ]);
+  const [avatars, banner, blueskyAvatar] = await Promise.all([
+    fetchAvatars(getAvatarLogins(github)),
+    fetchBuffer(bluesky.banner),
+    fetchBuffer(bluesky.avatar),
   ]);
 
   return {
-    astroBadge,
-    avatar,
+    avatars,
+    banner,
+    bluesky,
+    blueskyAvatar,
     github,
     npmxCard,
     snake: { dark: snakeDark, light: snakeLight },
@@ -74,16 +81,21 @@ export async function fetchLiveSources(
 /** Loads the sources saved in `fixtures/`, so the profile renders without network access. */
 export async function loadFixtureSources(): Promise<ProfileSources> {
   const [
-    astroBadge,
-    avatar,
+    banner,
+    bluesky,
+    blueskyAvatar,
     github,
     npmxCard,
     snakeDark,
     snakeLight,
     spotifyWidget,
+    avatars,
   ] = await Promise.all([
-    readFixture(FIXTURE_FILES.astroBadge).then(String),
-    readFixture(FIXTURE_FILES.avatar),
+    readFixture(FIXTURE_FILES.banner),
+    readFixture(FIXTURE_FILES.bluesky).then(
+      (json) => JSON.parse(String(json)) as BlueskyProfile
+    ),
+    readFixture(FIXTURE_FILES.blueskyAvatar),
     readFixture(FIXTURE_FILES.github).then(
       (json) => JSON.parse(String(json)) as GitHubActivity
     ),
@@ -91,11 +103,14 @@ export async function loadFixtureSources(): Promise<ProfileSources> {
     readFixture(FIXTURE_FILES.snakeDark).then(String),
     readFixture(FIXTURE_FILES.snakeLight).then(String),
     readFixture(FIXTURE_FILES.spotifyWidget).then(String),
+    readFixtureAvatars(),
   ]);
 
   return {
-    astroBadge,
-    avatar,
+    avatars,
+    banner,
+    bluesky,
+    blueskyAvatar,
     github,
     npmxCard,
     snake: { dark: snakeDark, light: snakeLight },
@@ -104,39 +119,80 @@ export async function loadFixtureSources(): Promise<ProfileSources> {
 }
 
 export async function saveFixtureSources(sources: ProfileSources) {
-  await mkdir(FIXTURES_DIR, { recursive: true });
+  await mkdir(AVATARS_DIR, { recursive: true });
 
-  const files = new Map<string, Buffer | string>([
-    [FIXTURE_FILES.astroBadge, sources.astroBadge],
-    [FIXTURE_FILES.avatar, sources.avatar],
-    [FIXTURE_FILES.github, `${JSON.stringify(sources.github, null, 2)}\n`],
-    [FIXTURE_FILES.npmxCard, sources.npmxCard],
-    [FIXTURE_FILES.snakeDark, sources.snake.dark],
-    [FIXTURE_FILES.snakeLight, sources.snake.light],
-    [FIXTURE_FILES.spotifyWidget, sources.spotifyWidget],
+  const files = new Map<URL, Buffer | string>([
+    [new URL(FIXTURE_FILES.banner, FIXTURES_DIR), sources.banner],
+    [new URL(FIXTURE_FILES.bluesky, FIXTURES_DIR), toJson(sources.bluesky)],
+    [new URL(FIXTURE_FILES.blueskyAvatar, FIXTURES_DIR), sources.blueskyAvatar],
+    [new URL(FIXTURE_FILES.github, FIXTURES_DIR), toJson(sources.github)],
+    [new URL(FIXTURE_FILES.npmxCard, FIXTURES_DIR), sources.npmxCard],
+    [new URL(FIXTURE_FILES.snakeDark, FIXTURES_DIR), sources.snake.dark],
+    [new URL(FIXTURE_FILES.snakeLight, FIXTURES_DIR), sources.snake.light],
+    [new URL(FIXTURE_FILES.spotifyWidget, FIXTURES_DIR), sources.spotifyWidget],
+    ...[...sources.avatars].map(
+      ([login, avatar]) =>
+        [new URL(`${login}${AVATAR_EXTENSION}`, AVATARS_DIR), avatar] as const
+    ),
   ]);
 
   await Promise.all(
-    [...files].map(([name, content]) =>
-      writeFile(new URL(name, FIXTURES_DIR), content)
+    [...files].map(([file, content]) => writeFile(file, content))
+  );
+}
+
+async function fetchAvatars(logins: string[]) {
+  const avatars = await Promise.all(
+    logins.map(
+      async (login) =>
+        [
+          login,
+          await fetchBuffer(`https://github.com/${login}.png?size=96`),
+        ] as const
     )
   );
+
+  return new Map(avatars);
 }
 
 async function readSnake(snakeDir: URL, name: string) {
   const file = new URL(name, snakeDir);
   if (existsSync(file)) return readFile(file, "utf8");
 
-  return String(await fetchBuffer(`${SNAKE_OUTPUT_BRANCH_URL}${name}`));
+  return String(await fetchBuffer(`${OUTPUT_BRANCH_URL}${name}`));
+}
+
+async function readFixtureAvatars() {
+  const files = await readdir(AVATARS_DIR);
+  const avatars = await Promise.all(
+    files
+      .filter((file) => file.endsWith(AVATAR_EXTENSION))
+      .map(
+        async (file) =>
+          [
+            file.slice(0, -AVATAR_EXTENSION.length),
+            await readFile(new URL(file, AVATARS_DIR)),
+          ] as const
+      )
+  );
+
+  return new Map(avatars);
 }
 
 function readFixture(name: string) {
   return readFile(new URL(name, FIXTURES_DIR));
 }
 
+function toJson(value: unknown) {
+  return `${JSON.stringify(value, null, 2)}\n`;
+}
+
 export interface ProfileSources {
-  astroBadge: string;
-  avatar: Buffer;
+  /** GitHub avatars by login, for every owner and organization the profile shows. */
+  avatars: Map<string, Buffer>;
+  banner: Buffer;
+  bluesky: BlueskyProfile;
+  blueskyAvatar: Buffer;
   github: GitHubActivity;
   npmxCard: Buffer;
   snake: Record<ThemeName, string>;

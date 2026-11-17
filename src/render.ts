@@ -3,6 +3,7 @@ import satori from "satori";
 import type { Font } from "satori";
 
 import type { ProfileData } from "./data.ts";
+import { GITHUB_LOGIN } from "./github.ts";
 import { LAYOUT } from "./layout.ts";
 import { Profile } from "./profile.tsx";
 import { THEMES } from "./theme.ts";
@@ -13,6 +14,7 @@ const SVG_IMAGE_RE =
   /<image ([^>]*)href="data:image\/svg\+xml;base64,([^"]+)"([^>]*)\/>/g;
 const ATTRIBUTE_RE = /([a-zA-Z:-]+)="([^"]*)"/g;
 const ROOT_SVG_RE = /<svg([^>]*)>([\s\S]*)<\/svg>\s*$/;
+const IMAGE_RE = /<image ([^>]*?)href="(data:[^"]+)"([^>]*?)\/>/g;
 
 const KEPT_IMAGE_ATTRIBUTES = ["height", "width", "x", "y"] as const;
 const KEPT_ROOT_ATTRIBUTES = ["height", "viewBox", "width"] as const;
@@ -29,10 +31,63 @@ export async function renderProfile(
 ) {
   const svg = await satori(
     createElement(Profile, { data, theme: THEMES[themeName], themeName }),
-    { fonts, width: LAYOUT.width }
+    { fonts, ...LAYOUT.canvas }
   );
 
-  return addAccessibleName(inlineAnimatedImages(svg));
+  return addAccessibleName(
+    deduplicateImages(inlineAnimatedImages(svg)),
+    `${data.bluesky.displayName} (${GITHUB_LOGIN}) on GitHub`
+  );
+}
+
+/**
+ * Satori embeds an image once per use, and every glass card shows the same blurred
+ * landscape. This defines each repeated image once and points every use at it, which
+ * keeps the SVG a fraction of the size.
+ */
+export function deduplicateImages(svg: string) {
+  const counts = new Map<string, number>();
+  for (const [, , href = ""] of svg.matchAll(IMAGE_RE)) {
+    counts.set(href, (counts.get(href) ?? 0) + 1);
+  }
+
+  const symbols = new Map<string, string>();
+  const definitions: string[] = [];
+  const body = svg.replaceAll(
+    IMAGE_RE,
+    (image, before: string, href: string, after: string) => {
+      if ((counts.get(href) ?? 0) < 2) return image;
+
+      const attributes = parseAttributes(`${before} ${after}`);
+      let id = symbols.get(href);
+      if (!id) {
+        id = `image-${symbols.size}`;
+        symbols.set(href, id);
+        definitions.push(
+          `<symbol id="${id}" viewBox="0 0 ${attributes.width} ${attributes.height}" preserveAspectRatio="none"><image width="${attributes.width}" height="${attributes.height}" href="${href}" preserveAspectRatio="none"/></symbol>`
+        );
+      }
+
+      // The clipping moves to a wrapping group, because browsers resolve `clip-path` and
+      // `mask` on a `<use>` in the coordinate space of the referenced symbol.
+      const clipping = CLIPPING_ATTRIBUTES.filter((name) => attributes[name])
+        .map((name) => ` ${name}="${attributes[name]}"`)
+        .join("");
+
+      return `<g${clipping}><use href="#${id}"${stripAttributes(`${before} ${after}`, ["href", "preserveAspectRatio", ...CLIPPING_ATTRIBUTES])}/></g>`;
+    }
+  );
+
+  return definitions.length === 0
+    ? body
+    : body.replace(SVG_OPEN_TAG_RE, `$&<defs>${definitions.join("")}</defs>`);
+}
+
+function stripAttributes(source: string, names: string[]) {
+  return [...source.matchAll(ATTRIBUTE_RE)]
+    .filter(([, name = ""]) => !names.includes(name))
+    .map(([attribute]) => ` ${attribute}`)
+    .join("");
 }
 
 /**
@@ -83,9 +138,16 @@ function parseAttributes(source: string) {
   >;
 }
 
-function addAccessibleName(svg: string) {
+function addAccessibleName(svg: string, name: string) {
   return svg.replace(
     SVG_OPEN_TAG_RE,
-    '<svg$1 role="img" aria-labelledby="title"><title id="title">Felix Schneider (trueberryless) on GitHub</title>'
+    `<svg$1 role="img" aria-labelledby="title"><title id="title">${escapeXml(name)}</title>`
   );
+}
+
+function escapeXml(text: string) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }

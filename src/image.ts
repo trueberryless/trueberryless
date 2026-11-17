@@ -24,20 +24,28 @@ export function toDataUri(content: Buffer | string, mimeType: string) {
 }
 
 /**
- * Resizes a raster image to twice its display size, so it stays sharp on high density
- * screens without bloating the SVG, and re-encodes it as JPEG.
+ * Resizes and re-encodes a raster image as a JPEG data URI. By default it renders at
+ * twice the display size, so it stays sharp on high density screens.
  */
 export async function createImageDataUri(
   image: Buffer,
   { height, width }: ImageSize,
   options?: ImageOptions
 ) {
-  let pipeline = sharp(image).resize(width * 2, height * 2, {
-    fit: options?.fit ?? "cover",
-  });
-  if (options?.blur) pipeline = pipeline.blur(options.blur);
+  const scale = options?.scale ?? 2;
+  let pipeline = sharp(image).resize(
+    Math.round(width * scale),
+    Math.round(height * scale),
+    { fit: options?.fit ?? "cover", position: options?.position ?? "centre" }
+  );
+  if (options?.brightness !== undefined) {
+    pipeline = pipeline.modulate({ brightness: options.brightness });
+  }
+  if (options?.blur) pipeline = pipeline.blur(options.blur * scale);
 
-  const jpeg = await pipeline.jpeg({ mozjpeg: true, quality: 78 }).toBuffer();
+  const jpeg = await pipeline
+    .jpeg({ mozjpeg: true, quality: options?.quality ?? 78 })
+    .toBuffer();
 
   return toDataUri(jpeg, "image/jpeg");
 }
@@ -48,6 +56,12 @@ export interface ImageSize {
 }
 
 interface ImageOptions {
+  /** Blur radius in display pixels. */
   blur?: number;
+  brightness?: number;
   fit?: "contain" | "cover";
+  position?: "attention" | "centre" | "top";
+  quality?: number;
+  /** Pixel density of the output. Blurred images look the same at a lower density. */
+  scale?: number;
 }
