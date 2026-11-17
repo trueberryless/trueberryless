@@ -365,6 +365,9 @@ function MusicCard({
               letterSpacing: -0.5,
               lineClamp: 3,
               lineHeight: 1.1,
+              // A title may run a little under the record, but a single long word has to
+              // wrap too, so the clamp can cut it off with an ellipsis.
+              wordBreak: "break-word",
             }}
           >
             {music.title}

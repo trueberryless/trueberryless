@@ -8,13 +8,13 @@ const VINYL = { height: 196, width: 196, x: 215, y: 394 };
 describe("createTonearmSvg", () => {
   test("rests the needle on the record while the track plays", () => {
     expect(createTonearmSvg(CARD, VINYL, { isPlaying: true })).toContain(
-      'transform="rotate(0 348 230)"'
+      'transform="rotate(0 378 6)"'
     );
   });
 
-  test("swings the arm away from the record otherwise", () => {
+  test("swings the arm up and away from the record otherwise", () => {
     expect(createTonearmSvg(CARD, VINYL, { isPlaying: false })).toContain(
-      'transform="rotate(-24 348 230)"'
+      'transform="rotate(28 378 6)"'
     );
   });
 
