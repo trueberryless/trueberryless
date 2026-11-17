@@ -9,8 +9,10 @@ import type { IconName } from "./icon.ts";
 import { toDataUri } from "./image.ts";
 import { LAYOUT } from "./layout.ts";
 import type { Rect } from "./layout.ts";
-import { RING_INSET, createShareRingSvg } from "./ring.ts";
+import { getMilestoneProgress } from "./milestone.ts";
+import { RING_INSET, createProgressRingSvg } from "./ring.ts";
 import type { Theme, ThemeName } from "./theme.ts";
+import { createTonearmSvg } from "./tonearm.ts";
 import { createVinylSvg } from "./vinyl.ts";
 
 const HEADING_FONT = "Hubot Sans";
@@ -34,7 +36,7 @@ const ELLIPSIS: CSSProperties = {
 
 const OWNER_GRID_COLUMNS = 3;
 const LARGEST_BUBBLE = 104;
-const SMALL_BUBBLE = { max: 48, min: 36 };
+const SMALL_BUBBLE = { max: 42, min: 34 };
 
 /**
  * Everything of the profile that doesn't move. It gets flattened into one image, and the
@@ -90,7 +92,6 @@ export function Profile({ data, theme, themeName }: ProfileProps) {
         avatars={data.avatars}
         glass={glass}
         owners={data.github.topOwners}
-        total={data.github.externalMergedPullRequests}
       />
       {/* The snake itself is drawn on top of the flattened image. */}
       <Glass context={glass} rect={cards.snake} tint={theme.solidTint} />
@@ -303,19 +304,28 @@ function MusicCard({
       <div style={{ ...FULL, backgroundImage: theme.scrim, display: "flex" }} />
       {/* A playing record spins on top of the flattened image, a paused one stays here. */}
       {music.isPlaying ? null : (
-        <Picture
-          src={toDataUri(
-            createVinylSvg(music.cover, { isSpinning: false }),
-            "image/svg+xml"
-          )}
-          style={{
-            height: vinyl.height,
-            left: vinyl.x - cards.music.x,
-            position: "absolute",
-            top: vinyl.y - cards.music.y,
-            width: vinyl.width,
-          }}
-        />
+        <>
+          <Picture
+            src={toDataUri(
+              createVinylSvg(music.cover, { isSpinning: false }),
+              "image/svg+xml"
+            )}
+            style={{
+              height: vinyl.height,
+              left: vinyl.x - cards.music.x,
+              position: "absolute",
+              top: vinyl.y - cards.music.y,
+              width: vinyl.width,
+            }}
+          />
+          <Picture
+            src={toDataUri(
+              createTonearmSvg(cards.music, vinyl, { isPlaying: false }),
+              "image/svg+xml"
+            )}
+            style={FULL}
+          />
+        </>
       )}
       <div
         style={{
@@ -473,12 +483,10 @@ function OwnersCard({
   avatars,
   glass,
   owners,
-  total,
 }: {
   avatars: Map<string, string>;
   glass: GlassContext;
   owners: ProfileData["github"]["topOwners"];
-  total: number;
 }) {
   const { theme } = glass;
   const [first, ...rest] = owners;
@@ -496,13 +504,12 @@ function OwnersCard({
       style={{ flexDirection: "column", gap: 16, padding: 20 }}
     >
       <span style={{ color: theme.muted, fontSize: 13, lineHeight: 1.2 }}>
-        share of merged pull requests by project owner
+        merged PRs by owner and their next milestone
       </span>
       <div style={{ alignItems: "center", display: "flex", flex: 1, gap: 20 }}>
         <Bubble
           avatar={avatars.get(first.login)}
           count={first.mergedPullRequests}
-          share={first.mergedPullRequests / total}
           size={LARGEST_BUBBLE}
           theme={theme}
         />
@@ -534,7 +541,6 @@ function OwnersCard({
                       <Bubble
                         avatar={avatars.get(owner.login)}
                         count={owner.mergedPullRequests}
-                        share={owner.mergedPullRequests / total}
                         size={getBubbleSize(owner, first)}
                         theme={theme}
                       />
@@ -553,19 +559,18 @@ function OwnersCard({
 function Bubble({
   avatar,
   count,
-  share,
   size,
   theme,
 }: {
   avatar: string | undefined;
   count: number;
-  /** The owner's share of all merged pull requests, shown as a ring. */
-  share: number;
   size: number;
   theme: Theme;
 }) {
   const diameter = size + RING_INSET * 2;
-  const ring = createShareRingSvg(diameter, share, {
+  const { milestone, progress } = getMilestoneProgress(count);
+  // The ring fills up on the way to the next milestone, which the count label names.
+  const ring = createProgressRingSvg(diameter, progress, {
     color: theme.merged,
     track: theme.divider,
   });
@@ -606,6 +611,7 @@ function Bubble({
           borderRadius: 999,
           color: theme.page,
           fontSize: 11,
+          display: "flex",
           fontWeight: 600,
           marginTop: -10,
           padding: "2px 7px",
@@ -614,6 +620,9 @@ function Bubble({
         }}
       >
         {formatNumber(count)}
+        <span style={{ marginLeft: 3, opacity: 0.55 }}>
+          / {formatNumber(milestone)}
+        </span>
       </span>
     </div>
   );

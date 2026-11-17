@@ -3,18 +3,18 @@ export const RING_INSET = 6;
 const STROKE_WIDTH = 3;
 
 /**
- * Creates a ring around an avatar that fills up to the given share, starting at the top
+ * Creates a ring around an avatar that fills up to the given progress, starting at the top
  * and running clockwise, with a faint track for the rest.
  */
-export function createShareRingSvg(
+export function createProgressRingSvg(
   diameter: number,
-  share: number,
+  progress: number,
   { color, track }: { color: string; track: string }
 ) {
   const center = diameter / 2;
   const radius = center - STROKE_WIDTH / 2;
   const circumference = 2 * Math.PI * radius;
-  const length = Math.max(0, Math.min(1, share)) * circumference;
+  const length = Math.max(0, Math.min(1, progress)) * circumference;
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${diameter}" height="${diameter}" viewBox="0 0 ${diameter} ${diameter}">`,

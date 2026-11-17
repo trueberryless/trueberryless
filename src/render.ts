@@ -14,6 +14,7 @@ import { Profile } from "./profile.tsx";
 import { cropSnake, recolorSnake } from "./snake.ts";
 import { THEMES } from "./theme.ts";
 import type { ThemeName } from "./theme.ts";
+import { createTonearmSvg } from "./tonearm.ts";
 import { createVinylSvg } from "./vinyl.ts";
 
 // Twice the display size keeps text sharp on high density screens. GitHub shows the
@@ -61,10 +62,23 @@ async function rasterizeSvg(svg: string) {
     .render()
     .asPng();
   const webp = await sharp(png)
+    .composite([{ blend: "dest-in", input: createCanvasMask() }])
     .webp({ effort: 6, quality: WEBP_QUALITY, smartSubsample: true })
     .toBuffer();
 
   return toDataUri(webp, "image/webp");
+}
+
+// The shadow filters of the cards escape the rounded clip of the canvas and would show up
+// as a grey halo in its corners, so the flattened image gets cut to the rounded shape.
+function createCanvasMask() {
+  const { canvas, canvasRadius } = LAYOUT;
+  const width = canvas.width * RASTER_SCALE;
+  const height = canvas.height * RASTER_SCALE;
+
+  return Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" rx="${canvasRadius * RASTER_SCALE}"/></svg>`
+  );
 }
 
 function createAnimatedLayers(data: ProfileData, themeName: ThemeName) {
@@ -81,7 +95,17 @@ function createAnimatedLayers(data: ProfileData, themeName: ThemeName) {
     // The record sticks out of the card, so it gets clipped to the card's rounded corners.
     layers.push(
       `<clipPath id="music-clip"><rect x="${x + 1}" y="${y + 1}" width="${width - 2}" height="${height - 2}" rx="${cardRadius - 1}"/></clipPath>`,
-      `<g clip-path="url(#music-clip)">${inlineSvg(createVinylSvg(music.cover, { isSpinning: true }), musicLayout.vinyl)}</g>`,
+      `<g clip-path="url(#music-clip)">`,
+      inlineSvg(
+        createVinylSvg(music.cover, { isSpinning: true }),
+        musicLayout.vinyl
+      ),
+      // The tone arm lies on top of the record and hangs in from outside the card.
+      inlineSvg(
+        createTonearmSvg(cards.music, musicLayout.vinyl, { isPlaying: true }),
+        cards.music
+      ),
+      "</g>",
       inlineSvg(createEqualizerSvg(THEMES[themeName].accent), {
         ...EQUALIZER_SIZE,
         ...musicLayout.equalizer,
