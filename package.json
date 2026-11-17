@@ -2,7 +2,7 @@
   "name": "trueberryless",
   "version": "0.0.0",
   "private": true,
-  "homepage": "https://trueberryless.netlify.app/",
+  "homepage": "https://felixs.dev",
   "bugs": {
     "url": "https://github.com/trueberryless/trueberryless/issues"
   },
@@ -14,7 +14,10 @@
   "author": "trueberryless <trueberryless@gmail.com> (https://felixs.dev)",
   "type": "module",
   "scripts": {
-    "build": "tsx scripts/build.ts",
+    "build": "tsx src/build.ts",
+    "build:live": "tsx src/build.ts --live",
+    "check": "tsc --noEmit",
+    "fixtures": "tsx src/build.ts --live --update-fixtures",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "knip": "knip",
@@ -23,13 +26,25 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "pnpm build && playwright test"
   },
+  "dependencies": {
+    "@fontsource/hubot-sans": "^5.3.0",
+    "@fontsource/mona-sans": "^5.3.0",
+    "@fontsource/monaspace-neon": "^5.3.0",
+    "react": "^19.3.1",
+    "satori": "^0.63.2",
+    "sharp": "^0.35.5"
+  },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
-    "@types/node": "^20.0.0",
+    "@trivago/prettier-plugin-sort-imports": "6.0.2",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
     "@vitest/coverage-v8": "^5.0.3",
     "knip": "^6.39.0",
     "oxlint": "^1.86.0",
+    "prettier": "3.9.9",
+    "prettier-plugin-astro": "1.1.0",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
     "vitest": "^5.0.3"
