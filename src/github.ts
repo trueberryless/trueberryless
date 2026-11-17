@@ -85,6 +85,7 @@ export function parseGitHubActivity({
   );
 
   return {
+    externalMergedPullRequests: merged.length,
     latestPullRequests: merged
       .slice(0, PULL_REQUEST_COUNT)
       .map(({ mergedAt, number, repository, title }) => ({
@@ -206,6 +207,8 @@ async function requestGitHub<T>(token: string, path: string, body?: unknown) {
 }
 
 export interface GitHubActivity {
+  /** How many pull requests were merged into other people's repositories. */
+  externalMergedPullRequests: number;
   latestPullRequests: MergedPullRequest[];
   /** Public organization memberships, without personal organizations. */
   memberships: string[];

@@ -9,6 +9,7 @@ import type { IconName } from "./icon.ts";
 import { toDataUri } from "./image.ts";
 import { LAYOUT } from "./layout.ts";
 import type { Rect } from "./layout.ts";
+import { RING_INSET, createShareRingSvg } from "./ring.ts";
 import type { Theme, ThemeName } from "./theme.ts";
 import { createVinylSvg } from "./vinyl.ts";
 
@@ -32,8 +33,8 @@ const ELLIPSIS: CSSProperties = {
 };
 
 const OWNER_GRID_COLUMNS = 3;
-const LARGEST_BUBBLE = 108;
-const SMALL_BUBBLE = { max: 54, min: 36 };
+const LARGEST_BUBBLE = 104;
+const SMALL_BUBBLE = { max: 48, min: 36 };
 
 /**
  * Everything of the profile that doesn't move. It gets flattened into one image, and the
@@ -76,7 +77,7 @@ export function Profile({ data, theme, themeName }: ProfileProps) {
           display: "flex",
         }}
       />
-      <NamePlate data={data} glass={glass} />
+      <NamePlate data={data} glass={glass} themeName={themeName} />
       <Stats glass={glass} stats={data.github.stats} />
       <MusicCard music={data.music} theme={theme} />
       <PullRequestsCard
@@ -89,9 +90,19 @@ export function Profile({ data, theme, themeName }: ProfileProps) {
         avatars={data.avatars}
         glass={glass}
         owners={data.github.topOwners}
+        total={data.github.externalMergedPullRequests}
       />
       {/* The snake itself is drawn on top of the flattened image. */}
       <Glass context={glass} rect={cards.snake} tint={theme.solidTint} />
+      {/* Drawn last, so the edge sits on top of everything without moving the layout. */}
+      <div
+        style={{
+          ...FULL,
+          border: `1px solid ${theme.border}`,
+          borderRadius: canvasRadius,
+          display: "flex",
+        }}
+      />
     </div>
   );
 }
@@ -99,9 +110,11 @@ export function Profile({ data, theme, themeName }: ProfileProps) {
 function NamePlate({
   data,
   glass,
+  themeName,
 }: {
   data: ProfileData;
   glass: GlassContext;
+  themeName: ThemeName;
 }) {
   const { bluesky, github } = data;
   const { avatar, padding, rect } = LAYOUT.namePlate;
@@ -153,7 +166,8 @@ function NamePlate({
             alignItems: "center",
             display: "flex",
             gap: 12,
-            marginTop: 16,
+            height: 30,
+            marginTop: 14,
           }}
         >
           <span
@@ -170,8 +184,9 @@ function NamePlate({
           >
             @{bluesky.handle}
           </span>
-          <div style={{ alignItems: "center", display: "flex", gap: 6 }}>
-            {github.memberships.map((login) => {
+          {/* Overlapping avatars, with rings in the color of the glass so they look cut out. */}
+          <div style={{ alignItems: "center", display: "flex" }}>
+            {github.memberships.map((login, index) => {
               const organizationAvatar = data.avatars.get(login);
               if (!organizationAvatar) return null;
 
@@ -179,7 +194,13 @@ function NamePlate({
                 <Picture
                   key={login}
                   src={organizationAvatar}
-                  style={{ borderRadius: 999, height: 26, width: 26 }}
+                  style={{
+                    border: `2px solid ${data.backdrops[themeName].namePlateColor}`,
+                    borderRadius: 999,
+                    height: 30,
+                    marginLeft: index === 0 ? 0 : -8,
+                    width: 30,
+                  }}
                 />
               );
             })}
@@ -452,10 +473,12 @@ function OwnersCard({
   avatars,
   glass,
   owners,
+  total,
 }: {
   avatars: Map<string, string>;
   glass: GlassContext;
   owners: ProfileData["github"]["topOwners"];
+  total: number;
 }) {
   const { theme } = glass;
   const [first, ...rest] = owners;
@@ -473,12 +496,13 @@ function OwnersCard({
       style={{ flexDirection: "column", gap: 16, padding: 20 }}
     >
       <span style={{ color: theme.muted, fontSize: 13, lineHeight: 1.2 }}>
-        merged pull requests by project owner
+        share of merged pull requests by project owner
       </span>
       <div style={{ alignItems: "center", display: "flex", flex: 1, gap: 20 }}>
         <Bubble
           avatar={avatars.get(first.login)}
           count={first.mergedPullRequests}
+          share={first.mergedPullRequests / total}
           size={LARGEST_BUBBLE}
           theme={theme}
         />
@@ -510,6 +534,7 @@ function OwnersCard({
                       <Bubble
                         avatar={avatars.get(owner.login)}
                         count={owner.mergedPullRequests}
+                        share={owner.mergedPullRequests / total}
                         size={getBubbleSize(owner, first)}
                         theme={theme}
                       />
@@ -528,34 +553,53 @@ function OwnersCard({
 function Bubble({
   avatar,
   count,
+  share,
   size,
   theme,
 }: {
   avatar: string | undefined;
   count: number;
+  /** The owner's share of all merged pull requests, shown as a ring. */
+  share: number;
   size: number;
   theme: Theme;
 }) {
+  const diameter = size + RING_INSET * 2;
+  const ring = createShareRingSvg(diameter, share, {
+    color: theme.merged,
+    track: theme.divider,
+  });
+
   return (
     <div
       style={{ alignItems: "center", display: "flex", flexDirection: "column" }}
     >
-      {avatar ? (
+      <div
+        style={{
+          display: "flex",
+          height: diameter,
+          position: "relative",
+          width: diameter,
+        }}
+      >
         <Picture
-          src={avatar}
-          style={{ borderRadius: 999, height: size, width: size }}
+          src={toDataUri(ring, "image/svg+xml")}
+          style={{ ...FULL, objectFit: "contain" }}
         />
-      ) : (
-        <div
-          style={{
-            backgroundColor: theme.pill,
-            borderRadius: 999,
-            display: "flex",
-            height: size,
-            width: size,
-          }}
-        />
-      )}
+        {avatar ? (
+          <Picture
+            src={avatar}
+            style={{
+              borderRadius: 999,
+              height: size,
+              left: RING_INSET,
+              position: "absolute",
+              top: RING_INSET,
+              width: size,
+            }}
+          />
+        ) : null}
+      </div>
       <span
         style={{
           backgroundColor: theme.text,
@@ -565,6 +609,8 @@ function Bubble({
           fontWeight: 600,
           marginTop: -10,
           padding: "2px 7px",
+          // The ring is positioned, so the count needs a position to paint on top of it.
+          position: "relative",
         }}
       >
         {formatNumber(count)}

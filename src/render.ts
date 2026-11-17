@@ -11,7 +11,7 @@ import { toDataUri } from "./image.ts";
 import { LAYOUT } from "./layout.ts";
 import type { Rect } from "./layout.ts";
 import { Profile } from "./profile.tsx";
-import { cropSnake } from "./snake.ts";
+import { cropSnake, recolorSnake } from "./snake.ts";
 import { THEMES } from "./theme.ts";
 import type { ThemeName } from "./theme.ts";
 import { createVinylSvg } from "./vinyl.ts";
@@ -69,7 +69,11 @@ async function rasterizeSvg(svg: string) {
 
 function createAnimatedLayers(data: ProfileData, themeName: ThemeName) {
   const { cards, cardRadius, music: musicLayout } = LAYOUT;
-  const layers = [inlineSvg(cropSnake(data.snake[themeName]), cards.snake)];
+  const snake = recolorSnake(
+    cropSnake(data.snake[themeName]),
+    THEMES[themeName].snake
+  );
+  const layers = [inlineSvg(snake, cards.snake)];
 
   const { music } = data;
   if (music?.isPlaying) {

@@ -1,3 +1,4 @@
+import { createBackdropCanvas, getGlassColor } from "./backdrop.ts";
 import type { BlueskyProfile } from "./bluesky.ts";
 import type { GitHubActivity } from "./github.ts";
 import { createImageDataUri } from "./image.ts";
@@ -39,19 +40,27 @@ export async function createProfileData(
 }
 
 async function createBackdrops(banner: Buffer) {
+  const canvas = await createBackdropCanvas(banner, LAYOUT.canvas);
   const backdrops = await Promise.all(
     THEME_NAMES.map(async (themeName) => {
-      const { backdropBrightness: brightness } = THEMES[themeName];
-      const [bannerImage, glass] = await Promise.all([
+      const { backdropBrightness: brightness, glassTint } = THEMES[themeName];
+      const [bannerImage, glass, namePlateColor] = await Promise.all([
         createImageDataUri(banner, LAYOUT.banner, { brightness, quality: 80 }),
-        createImageDataUri(banner, LAYOUT.canvas, {
+        createImageDataUri(canvas, LAYOUT.canvas, {
           blur: GLASS_BLUR,
           brightness,
           scale: GLASS_SCALE,
         }),
+        getGlassColor(canvas, LAYOUT.namePlate.rect, {
+          brightness,
+          tint: glassTint,
+        }),
       ]);
 
-      return [themeName, { banner: bannerImage, glass }] as const;
+      return [
+        themeName,
+        { banner: bannerImage, glass, namePlateColor },
+      ] as const;
     })
   );
 
@@ -114,6 +123,8 @@ interface Backdrop {
    * the part of it that lies behind the card.
    */
   glass: string;
+  /** The average color of the name plate, for the rings between its overlapping avatars. */
+  namePlateColor: string;
 }
 
 export interface Music {
