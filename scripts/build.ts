@@ -62,12 +62,12 @@ async function build() {
   );
 
   const npmxersRes = await fetchWithRetry(
-    "https://npmxers.trueberryless.org/_og/r/trueberryless.png",
+    "https://npmxers.netlify.app/_og/r/trueberryless.png",
   );
   const npmxersBuffer = await npmxersRes.arrayBuffer();
   const npmxersBase64 = Buffer.from(npmxersBuffer).toString("base64");
   html = html.replace(
-    "https://npmxers.trueberryless.org/_og/r/trueberryless.png",
+    "https://npmxers.netlify.app/_og/r/trueberryless.png",
     `data:image/png;base64,${npmxersBase64}`,
   );
 
