@@ -1,8 +1,6 @@
 export const SPOTIFY_WIDGET_URL =
   "https://spotify-github-profile.kittinanx.com/api/view?uid=pjyifjjapvah0yoy2zvd8vx0v&cover_image=true&theme=default&show_offline=false&interchange=true";
 
-// The widget is an HTML card inside a `<foreignObject>`. With `interchange=true`, the
-// bold `artist` line holds the track title and the `song` line holds the artist.
 const TITLE_RE = /<div class="artist">([^<]*)<\/div>/;
 const ARTIST_RE = /<div class="song">([^<]*)<\/div>/;
 const COVER_RE =
@@ -19,11 +17,6 @@ const HTML_ENTITIES = new Map([
   ["quot", '"'],
 ]);
 
-/**
- * Reads the track out of the Spotify widget SVG so the profile can render it in its own
- * style. Returns `undefined` when the widget doesn't contain a track, e.g. when it shows
- * an error.
- */
 export function parseSpotifyWidget(svg: string): SpotifyTrack | undefined {
   const title = TITLE_RE.exec(svg)?.[1];
   const artist = ARTIST_RE.exec(svg)?.[1];

@@ -3,11 +3,6 @@ const CENTER = SIZE / 2;
 const LABEL_RADIUS = 46;
 const GROOVE_RADII = Array.from({ length: 12 }, (_, index) => 52 + index * 4);
 
-/**
- * Creates a vinyl record with the album cover as its label. While the track plays, the
- * record spins. The light reflection sits outside the spinning group, so it stays in
- * place like on a real turntable.
- */
 export function createVinylSvg(cover: string, { isSpinning }: VinylOptions) {
   const grooves = GROOVE_RADII.map(
     (radius) =>
@@ -16,8 +11,6 @@ export function createVinylSvg(cover: string, { isSpinning }: VinylOptions) {
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">`,
-    // The profile inlines this SVG, so its ids and class names must not clash with the
-    // contribution snake or the equalizer.
     isSpinning
       ? [
           "<style>",

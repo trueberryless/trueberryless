@@ -11,7 +11,6 @@ const PATH_TAG_RE = /<path /g;
 
 export type IconName = "code-review" | "flame" | "git-merge" | "repo";
 
-/** Creates an Octicon as an SVG data URI in the given color. */
 export function createIconDataUri(name: IconName, color: string, size = 16) {
   const icon = OCTICONS[name]?.heights[size];
   if (!icon) {

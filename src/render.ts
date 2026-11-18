@@ -17,20 +17,12 @@ import type { ThemeName } from "./theme.ts";
 import { createTonearmSvg } from "./tonearm.ts";
 import { createVinylSvg } from "./vinyl.ts";
 
-// Twice the display size keeps text sharp on high density screens. GitHub shows the
-// profile at most 840 pixels wide, and smaller on phones.
 const RASTER_SCALE = 2;
 const WEBP_QUALITY = 84;
 
 const ATTRIBUTE_RE = /([a-zA-Z:-]+)="([^"]*)"/g;
 const ROOT_SVG_RE = /<svg([^>]*)>([\s\S]*)<\/svg>\s*$/;
 
-/**
- * Renders the profile into an SVG that stays smooth on slow devices. A browser repaints an
- * SVG image as a whole on every animation frame, so everything static (glass, shadows,
- * text and photos) is flattened into one WebP image, and only the snake, the spinning
- * record and the equalizer stay vectors on top of it.
- */
 export async function renderProfile(
   data: ProfileData,
   themeName: ThemeName,
@@ -54,7 +46,6 @@ export async function renderProfile(
 }
 
 async function rasterizeSvg(svg: string) {
-  // Satori already turned all text into paths, so no fonts need to be loaded.
   const png = new Resvg(svg, {
     fitTo: { mode: "zoom", value: RASTER_SCALE },
     font: { loadSystemFonts: false },
@@ -69,8 +60,6 @@ async function rasterizeSvg(svg: string) {
   return toDataUri(webp, "image/webp");
 }
 
-// The shadow filters of the cards escape the rounded clip of the canvas and would show up
-// as a grey halo in its corners, so the flattened image gets cut to the rounded shape.
 function createCanvasMask() {
   const { canvas, canvasRadius } = LAYOUT;
   const width = canvas.width * RASTER_SCALE;
@@ -92,7 +81,6 @@ function createAnimatedLayers(data: ProfileData, themeName: ThemeName) {
   const { music } = data;
   if (music?.isPlaying) {
     const { height, width, x, y } = cards.music;
-    // The record sticks out of the card, so it gets clipped to the card's rounded corners.
     layers.push(
       `<clipPath id="music-clip"><rect x="${x + 1}" y="${y + 1}" width="${width - 2}" height="${height - 2}" rx="${cardRadius - 1}"/></clipPath>`,
       `<g clip-path="url(#music-clip)">`,
@@ -100,7 +88,6 @@ function createAnimatedLayers(data: ProfileData, themeName: ThemeName) {
         createVinylSvg(music.cover, { isSpinning: true }),
         musicLayout.vinyl
       ),
-      // The tone arm lies on top of the record and hangs in from outside the card.
       inlineSvg(
         createTonearmSvg(cards.music, musicLayout.vinyl, { isPlaying: true }),
         cards.music
@@ -116,7 +103,6 @@ function createAnimatedLayers(data: ProfileData, themeName: ThemeName) {
   return layers;
 }
 
-/** Places an SVG document inside another one, filling the given rectangle. */
 export function inlineSvg(source: string, { height, width, x, y }: Rect) {
   const root = ROOT_SVG_RE.exec(source);
   if (!root) {

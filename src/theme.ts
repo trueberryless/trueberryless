@@ -2,9 +2,6 @@ import type { SnakePalette } from "./snake.ts";
 
 export const THEME_NAMES = ["dark", "light"] as const;
 
-// The text, border, accent and page colors are GitHub's own Primer tokens, and the
-// backdrop fades into the page color at the bottom, so the profile sits in the GitHub UI
-// instead of floating on top of it.
 export const THEMES = {
   dark: {
     accent: "#3fb950",
@@ -70,10 +67,8 @@ export type ThemeName = (typeof THEME_NAMES)[number];
 
 export interface Theme {
   accent: string;
-  /** How bright the landscape behind the cards is, as a `sharp` brightness factor. */
   backdropBrightness: number;
   backdropOverlay: string;
-  /** GitHub's border color, used for the outer edge of the profile. */
   border: string;
   divider: string;
   glassBorder: string;
@@ -81,14 +76,10 @@ export interface Theme {
   glassTint: string;
   merged: string;
   muted: string;
-  /** The background of the GitHub page. */
   page: string;
   pill: string;
-  /** Keeps text readable on top of the album cover. */
   scrim: string;
-  /** GitHub's contribution colors with enough contrast to read on the glass. */
   snake: SnakePalette;
-  /** A nearly opaque tint for content that brings its own colors, like the snake. */
   solidTint: string;
   text: string;
 }

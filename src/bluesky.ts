@@ -2,12 +2,10 @@ const BLUESKY_HANDLE = "felixs.dev";
 
 const PROFILE_URL = `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${BLUESKY_HANDLE}`;
 
-/**
- * Fetches the public Bluesky profile. Its name, bio, avatar and banner make up the top of
- * the GitHub profile, so changing them on Bluesky updates both.
- */
 export async function fetchBlueskyProfile(): Promise<BlueskyProfile> {
-  const response = await fetch(PROFILE_URL);
+  const response = await fetch(PROFILE_URL, {
+    signal: AbortSignal.timeout(30_000),
+  });
   if (!response.ok) {
     throw new Error(
       `[profile] Bluesky answered with \`${response.status} ${response.statusText}\` for \`${BLUESKY_HANDLE}\`.`

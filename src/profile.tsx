@@ -38,11 +38,6 @@ const OWNER_GRID_COLUMNS = 3;
 const LARGEST_BUBBLE = 104;
 const SMALL_BUBBLE = { max: 42, min: 34 };
 
-/**
- * Everything of the profile that doesn't move. It gets flattened into one image, and the
- * animated parts (the snake, the spinning record and the equalizer) are drawn on top of
- * it as vectors, so the browser only repaints a few shapes per frame.
- */
 export function Profile({ data, theme, themeName }: ProfileProps) {
   const { canvas, canvasRadius, cards } = LAYOUT;
   const backdrop = data.backdrops[themeName];
@@ -93,9 +88,7 @@ export function Profile({ data, theme, themeName }: ProfileProps) {
         glass={glass}
         owners={data.github.topOwners}
       />
-      {/* The snake itself is drawn on top of the flattened image. */}
       <Glass context={glass} rect={cards.snake} tint={theme.solidTint} />
-      {/* Drawn last, so the edge sits on top of everything without moving the layout. */}
       <div
         style={{
           ...FULL,
@@ -185,7 +178,6 @@ function NamePlate({
           >
             @{bluesky.handle}
           </span>
-          {/* Overlapping avatars, with rings in the color of the glass so they look cut out. */}
           <div style={{ alignItems: "center", display: "flex" }}>
             {github.memberships.map((login, index) => {
               const organizationAvatar = data.avatars.get(login);
@@ -302,7 +294,6 @@ function MusicCard({
     <Card rect={cards.music} theme={theme}>
       <Picture src={music.background} style={FULL} />
       <div style={{ ...FULL, backgroundImage: theme.scrim, display: "flex" }} />
-      {/* A playing record spins on top of the flattened image, a paused one stays here. */}
       {music.isPlaying ? null : (
         <>
           <Picture
@@ -349,7 +340,6 @@ function MusicCard({
             height: labelHeight,
           }}
         >
-          {/* Keeps room for the equalizer, which is drawn on top. */}
           {music.isPlaying ? (
             <div style={{ ...EQUALIZER_SIZE, display: "flex" }} />
           ) : null}
@@ -365,8 +355,6 @@ function MusicCard({
               letterSpacing: -0.5,
               lineClamp: 3,
               lineHeight: 1.1,
-              // A title may run a little under the record, but a single long word has to
-              // wrap too, so the clamp can cut it off with an ellipsis.
               wordBreak: "break-word",
             }}
           >
@@ -527,7 +515,6 @@ function OwnersCard({
         >
           {rows.map((row) => (
             <div key={row[0]?.login} style={{ display: "flex" }}>
-              {/* Empty cells keep a short row aligned with the columns above it. */}
               {Array.from({ length: OWNER_GRID_COLUMNS }, (_, index) => {
                 const owner = row[index];
 
@@ -572,7 +559,6 @@ function Bubble({
 }) {
   const diameter = size + RING_INSET * 2;
   const { milestone, progress } = getMilestoneProgress(count);
-  // The ring fills up on the way to the next milestone, which the count label names.
   const ring = createProgressRingSvg(diameter, progress, {
     color: theme.merged,
     track: theme.divider,
@@ -618,7 +604,6 @@ function Bubble({
           fontWeight: 600,
           marginTop: -10,
           padding: "2px 7px",
-          // The ring is positioned, so the count needs a position to paint on top of it.
           position: "relative",
         }}
       >
@@ -631,8 +616,6 @@ function Bubble({
   );
 }
 
-// Areas grow with the count, so the diameter grows with its square root. The smaller
-// bubbles share a grid, so their size is capped to fit a cell.
 function getBubbleSize(
   owner: { mergedPullRequests: number },
   largest: { mergedPullRequests: number }
@@ -663,7 +646,6 @@ function ImageCard({
   );
 }
 
-/** A card with a frosted glass background that shows the blurred landscape behind it. */
 function Glass({ children, context, rect, style, tint }: GlassProps) {
   const { canvas } = LAYOUT;
   const { image, theme } = context;
@@ -726,7 +708,6 @@ function Card({
 }
 
 function Picture({ src, style }: { src: string; style: CSSProperties }) {
-  // oxlint-disable-next-line jsx-a11y/alt-text -- Satori draws this into an image, where the README's `alt` describes it.
   return <img src={src} style={{ objectFit: "cover", ...style }} />;
 }
 
@@ -737,7 +718,6 @@ interface ProfileProps {
 }
 
 interface GlassContext {
-  /** The blurred landscape for the current theme. */
   image: string;
   theme: Theme;
 }
@@ -747,6 +727,5 @@ interface GlassProps {
   context: GlassContext;
   rect: Rect;
   style?: CSSProperties;
-  /** Overrides the tint, e.g. a more opaque one behind content that needs contrast. */
   tint?: string;
 }

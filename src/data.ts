@@ -8,12 +8,9 @@ import { parseSpotifyWidget } from "./spotify.ts";
 import { THEMES, THEME_NAMES } from "./theme.ts";
 import type { ThemeName } from "./theme.ts";
 
-// The glass only shows a blurred backdrop, so a low resolution looks the same and keeps
-// the SVG small.
 const GLASS_SCALE = 0.5;
 const GLASS_BLUR = 30;
 
-/** Turns the raw sources into the data URIs and values the profile renders. */
 export async function createProfileData(
   sources: ProfileSources
 ): Promise<ProfileData> {
@@ -105,7 +102,6 @@ async function createMusic(
 
 export interface ProfileData {
   avatar: string;
-  /** Avatar data URIs by GitHub login. */
   avatars: Map<string, string>;
   backdrops: Record<ThemeName, Backdrop>;
   bluesky: BlueskyProfile;
@@ -116,21 +112,14 @@ export interface ProfileData {
 }
 
 interface Backdrop {
-  /** The banner at its own aspect ratio, shown sharp at the top. */
   banner: string;
-  /**
-   * A blurred copy of the landscape. It fills the whole canvas and every glass card shows
-   * the part of it that lies behind the card.
-   */
   glass: string;
-  /** The average color of the name plate, for the rings between its overlapping avatars. */
   namePlateColor: string;
 }
 
 export interface Music {
   artist: string;
   background: string;
-  /** The album cover, sized for the label of the vinyl record. */
   cover: string;
   isPlaying: boolean;
   title: string;

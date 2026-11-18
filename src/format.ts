@@ -9,10 +9,6 @@ export function formatNumber(value: number) {
   return NUMBER_FORMAT.format(value);
 }
 
-/**
- * Formats a date as an absolute day like `17 Nov`. Relative dates would go stale between
- * two builds of the profile.
- */
 export function formatShortDate(isoDate: string) {
   return DATE_FORMAT.format(new Date(isoDate));
 }

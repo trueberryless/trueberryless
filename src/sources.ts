@@ -18,8 +18,6 @@ const AVATARS_DIR = new URL("avatars/", FIXTURES_DIR);
 const OUTPUT_BRANCH_URL = `https://raw.githubusercontent.com/${GITHUB_LOGIN}/${GITHUB_LOGIN}/output/`;
 const AVATAR_EXTENSION = ".png";
 
-// The file names `Platane/snk` writes in the update workflow. A local live build without
-// them falls back to the files published on the `output` branch.
 const SNAKE_FILES = {
   dark: "github-contribution-grid-snake-dark.svg",
   light: "github-contribution-grid-snake.svg",
@@ -36,11 +34,6 @@ const FIXTURE_FILES = {
   spotifyWidget: "spotify-widget.svg",
 } as const;
 
-/**
- * Fetches everything the profile shows from the live services.
- *
- * @param snakeDir The directory where `Platane/snk` wrote the contribution snakes.
- */
 export async function fetchLiveSources(
   token: string | undefined,
   snakeDir: URL
@@ -78,7 +71,6 @@ export async function fetchLiveSources(
   };
 }
 
-/** Loads the sources saved in `fixtures/`, so the profile renders without network access. */
 export async function loadFixtureSources(): Promise<ProfileSources> {
   const [
     banner,
@@ -188,7 +180,6 @@ function toJson(value: unknown) {
 }
 
 export interface ProfileSources {
-  /** GitHub avatars by login, for every owner and organization the profile shows. */
   avatars: Map<string, Buffer>;
   banner: Buffer;
   bluesky: BlueskyProfile;

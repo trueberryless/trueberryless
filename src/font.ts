@@ -4,8 +4,6 @@ import type { Font } from "satori";
 
 const require = createRequire(import.meta.url);
 
-// Satori reads TTF, OTF and WOFF but not WOFF2, so this uses the `.woff` files that
-// Fontsource ships next to the `.woff2` ones.
 const FONTS = [
   {
     name: "Mona Sans",

@@ -1,11 +1,6 @@
-/** The space between an avatar and its ring, plus the width of the ring itself. */
 export const RING_INSET = 6;
 const STROKE_WIDTH = 3;
 
-/**
- * Creates a ring around an avatar that fills up to the given progress, starting at the top
- * and running clockwise, with a faint track for the rest.
- */
 export function createProgressRingSvg(
   diameter: number,
   progress: number,

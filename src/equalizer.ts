@@ -3,11 +3,6 @@ const BAR_WIDTH = 3;
 const BAR_GAP = 2;
 const HEIGHT = 14;
 
-/**
- * Creates the animated equalizer shown next to a track that is playing right now. Satori
- * can't animate anything, so the bars live in their own small SVG with CSS animations
- * that the profile embeds as an image.
- */
 export function createEqualizerSvg(color: string) {
   const width = BAR_DURATIONS.length * (BAR_WIDTH + BAR_GAP) - BAR_GAP;
   const bars = BAR_DURATIONS.map(
@@ -15,8 +10,6 @@ export function createEqualizerSvg(color: string) {
       `<rect class="eq" x="${index * (BAR_WIDTH + BAR_GAP)}" y="0" width="${BAR_WIDTH}" height="${HEIGHT}" rx="1" style="animation-duration:${duration}s;animation-delay:-${index * 0.3}s"/>`
   );
 
-  // The profile inlines this SVG next to the snake, so the selectors and keyframes use
-  // names that can't clash with the snake's `.c` and `.s` classes.
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${HEIGHT}" viewBox="0 0 ${width} ${HEIGHT}">`,
     "<style>",

@@ -1,8 +1,5 @@
 import { SNAKE_RATIO } from "./snake.ts";
 
-// Every card has an absolute position on one grid. The glass effect depends on it: each
-// card shows the slice of the blurred landscape that lies right behind it. The animated
-// parts are drawn on top of the flattened image, so their positions are fixed here too.
 const WIDTH = 840;
 const INSET = 16;
 const GAP = 12;
@@ -33,7 +30,6 @@ const NAME_PLATE_HEIGHT = NAME_PLATE_AVATAR + NAME_PLATE_PADDING * 2;
 
 const MUSIC_PADDING = 22;
 const VINYL_SIZE = 196;
-// The record sticks out of the right edge of the card by a fifth of its size.
 const VINYL = rect(
   MUSIC.x + MUSIC.width - Math.round(VINYL_SIZE * 0.78),
   MUSIC.y + (MUSIC.height - VINYL_SIZE) / 2,
@@ -43,10 +39,8 @@ const VINYL = rect(
 const LABEL_HEIGHT = 16;
 
 export const LAYOUT = {
-  /** The Bluesky banner, sharp across the top and fading into the blurred backdrop. */
   banner: { height: WIDTH / 3, width: WIDTH },
   canvas: { height: bottom(SNAKE) + INSET, width: WIDTH },
-  // Concentric with the cards: the outer radius is the card radius plus the inset.
   canvasRadius: CARD_RADIUS + INSET,
   cardRadius: CARD_RADIUS,
   cards: {
@@ -59,7 +53,6 @@ export const LAYOUT = {
     stats: STATS,
   },
   music: {
-    /** The top left corner of the equalizer, which sits in the label row. */
     equalizer: { x: MUSIC.x + MUSIC_PADDING, y: MUSIC.y + MUSIC_PADDING + 1 },
     labelHeight: LABEL_HEIGHT,
     padding: MUSIC_PADDING,

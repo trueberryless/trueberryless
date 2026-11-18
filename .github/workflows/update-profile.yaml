@@ -24,7 +24,6 @@ jobs:
     name: Update profile
     runs-on: ubuntu-latest
     permissions:
-      # Publishes the generated SVGs to the `output` branch.
       contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -54,8 +53,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Force-pushes a single commit, so the branch never grows and `main` stays free of
-      # generated files.
       - name: Publish to the output branch
         uses: crazy-max/ghaction-github-pages@1d6ee9b181a81033a16bd707a1401afa978daab4 # v5.0.0
         with:

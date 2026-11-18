@@ -3,8 +3,8 @@ export const GITHUB_LOGIN = "trueberryless";
 const API_URL = "https://api.github.com";
 const PULL_REQUEST_COUNT = 4;
 const TOP_OWNER_COUNT = 6;
-// The search API returns at most 1,000 results, which is 10 pages.
 const MAX_SEARCH_PAGES = 10;
+const REQUEST_TIMEOUT = 60_000;
 
 const EXTERNAL_MERGED_QUERY = `author:${GITHUB_LOGIN} is:pr is:merged -user:${GITHUB_LOGIN}`;
 
@@ -30,8 +30,6 @@ const STATS_QUERY = `query ($login: String!, $merged: String!, $reviewed: String
   }
 }`;
 
-// `sort:updated-desc` is the closest the search API gets to "recently merged", so the
-// pull requests get sorted by their merge date afterwards.
 const MERGED_PULL_REQUESTS_QUERY = `query ($query: String!, $after: String) {
   search(query: $query, type: ISSUE, first: 100, after: $after) {
     pageInfo {
@@ -54,11 +52,6 @@ const MERGED_PULL_REQUESTS_QUERY = `query ($query: String!, $after: String) {
   }
 }`;
 
-/**
- * Fetches the contribution stats, the pull requests merged into other people's
- * repositories and the public organization memberships. The token only reads public
- * data, so the workflow's `GITHUB_TOKEN` is enough.
- */
 export async function fetchGitHubActivity(
   token: string
 ): Promise<GitHubActivity> {
@@ -94,7 +87,6 @@ export function parseGitHubActivity({
         repository: repository.name,
         title,
       })),
-    // Organizations named after the user are personal ones, not memberships worth showing.
     memberships: organizations
       .map(({ login }) => login)
       .filter((login) => !login.startsWith(GITHUB_LOGIN)),
@@ -110,7 +102,6 @@ export function parseGitHubActivity({
   };
 }
 
-/** Every login whose avatar the profile shows. */
 export function getAvatarLogins(activity: GitHubActivity) {
   return [
     ...new Set([
@@ -159,8 +150,6 @@ async function fetchMergedPullRequests(token: string) {
   return pullRequests;
 }
 
-// The GraphQL `organizations` field needs the `read:org` scope, while this REST endpoint
-// lists the public memberships with any token.
 async function fetchOrganizations(token: string) {
   return requestGitHub<Array<{ login: string }>>(
     token,
@@ -195,6 +184,7 @@ async function requestGitHub<T>(token: string, path: string, body?: unknown) {
       "user-agent": `${GITHUB_LOGIN}-profile`,
     },
     method: body === undefined ? "GET" : "POST",
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT),
   });
   if (!response.ok) {
     throw new Error(
@@ -207,10 +197,8 @@ async function requestGitHub<T>(token: string, path: string, body?: unknown) {
 
 export interface GitHubActivity {
   latestPullRequests: MergedPullRequest[];
-  /** Public organization memberships, without personal organizations. */
   memberships: string[];
   stats: GitHubStats;
-  /** The owners with the most merged pull requests, people and organizations alike. */
   topOwners: Array<{ login: string; mergedPullRequests: number }>;
 }
 

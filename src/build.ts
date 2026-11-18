@@ -41,7 +41,6 @@ await Promise.all([
   writeFile(new URL("index.html", DIST_DIR), createPreviewHtml()),
 ]);
 
-// A local preview of both variants on the background GitHub uses in each color mode.
 function createPreviewHtml() {
   const sections = THEME_NAMES.map(
     (themeName) =>

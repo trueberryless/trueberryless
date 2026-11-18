@@ -1,11 +1,14 @@
 import sharp from "sharp";
 
 const FETCH_ATTEMPTS = 3;
+const FETCH_TIMEOUT = 30_000;
 
 export async function fetchBuffer(url: string): Promise<Buffer> {
   for (let attempt = 1; ; attempt++) {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT),
+      });
       if (!response.ok) {
         throw new Error(
           `[profile] Fetching \`${url}\` failed with \`${response.status} ${response.statusText}\`.`
@@ -23,10 +26,6 @@ export function toDataUri(content: Buffer | string, mimeType: string) {
   return `data:${mimeType};base64,${Buffer.from(content).toString("base64")}`;
 }
 
-/**
- * Resizes and re-encodes a raster image as a JPEG data URI. By default it renders at
- * twice the display size, so it stays sharp on high density screens.
- */
 export async function createImageDataUri(
   image: Buffer,
   { height, width }: ImageSize,
@@ -56,12 +55,10 @@ export interface ImageSize {
 }
 
 interface ImageOptions {
-  /** Blur radius in display pixels. */
   blur?: number;
   brightness?: number;
   fit?: "contain" | "cover";
   position?: "attention" | "centre" | "top";
   quality?: number;
-  /** Pixel density of the output. Blurred images look the same at a lower density. */
   scale?: number;
 }

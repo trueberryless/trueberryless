@@ -15,8 +15,6 @@ for (const themeName of THEME_NAMES) {
       await expect.poll(() => previewPage.getNaturalWidth(themeName)).toBe(840);
     });
 
-    // Animations in an SVG that sits in an `<image>` don't run, which is why the snake and
-    // the equalizer are inlined. Any change between two frames proves they still play.
     test("plays its animations", async ({ previewPage }) => {
       await expect(previewPage.getProfile(themeName)).toBeVisible();
       const firstFrame = await previewPage.captureProfile(themeName);

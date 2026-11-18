@@ -3,17 +3,10 @@ import sharp from "sharp";
 import type { ImageSize } from "./image.ts";
 import type { Rect } from "./layout.ts";
 
-// The part of the banner, from its bottom edge, that continues the landscape below it.
 const STRIP_RATIO = 0.3;
-// The composition only gets blurred, so a low resolution is enough.
 const SCALE = 0.5;
 const RGBA_RE = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/;
 
-/**
- * Computes the average color a glass card shows at the given place: the backdrop behind
- * it, adjusted to the theme's brightness and covered by the tint. Elements that need to
- * look cut out of the glass, like the rings between overlapping avatars, use it.
- */
 export async function getGlassColor(
   canvas: Buffer,
   { height, width, x, y }: Rect,
@@ -40,12 +33,6 @@ export async function getGlassColor(
   return `#${mixed.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
 }
 
-/**
- * Extends the banner to the size of the whole canvas. A center crop of a wide banner
- * would put the sky behind the middle of the profile, which shows up as a bright band.
- * Instead, the bottom edge of the banner is mirrored and stretched downwards, so the
- * landscape continues without a seam.
- */
 export async function createBackdropCanvas(
   banner: Buffer,
   { height, width }: ImageSize
