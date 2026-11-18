@@ -44,7 +44,6 @@ export const LAYOUT = {
   canvasRadius: CARD_RADIUS + INSET,
   cardRadius: CARD_RADIUS,
   cards: {
-    hero: HERO,
     music: MUSIC,
     npmx: NPMX,
     owners: OWNERS,

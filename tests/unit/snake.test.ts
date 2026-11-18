@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 
-import { cropSnake, recolorSnake } from "../../src/snake.ts";
+import {
+  cropSnake,
+  recolorSnake,
+  respectReducedMotion,
+} from "../../src/snake.ts";
 
 describe("cropSnake", () => {
   test("crops the view box to the grid and its margin", () => {
@@ -36,6 +40,16 @@ describe("recolorSnake", () => {
       )
     ).toBe(
       "<svg><style>:root{--c0:#000;--c1:#111;--c2:#222;--c3:#333;--c4:#444;--cb:#555;--ce:#666;--cs:#777}.c{fill:var(--ce)}</style></svg>"
+    );
+  });
+});
+
+describe("respectReducedMotion", () => {
+  test("stops the snake for people who prefer reduced motion", () => {
+    expect(
+      respectReducedMotion("<svg><style>.c{fill:red}</style><rect/></svg>")
+    ).toBe(
+      "<svg><style>.c{fill:red}@media (prefers-reduced-motion:reduce){.c,.s,.u{animation:none}}</style><rect/></svg>"
     );
   });
 });

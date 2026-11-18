@@ -1,6 +1,9 @@
 const VIEW_BOX_RE = /viewBox="(-?[\d.]+) (-?[\d.]+) ([\d.]+) ([\d.]+)"/;
 const SIZE_RE = / width="[\d.]+" height="[\d.]+"/;
 const ROOT_VARIABLES_RE = /:root\{[^}]*\}/;
+const STYLE_END_RE = /<\/style>/;
+const REDUCED_MOTION_RULE =
+  "@media (prefers-reduced-motion:reduce){.c,.s,.u{animation:none}}";
 
 const TOP = -20;
 const HEIGHT = 7 * 16 + 36;
@@ -24,6 +27,10 @@ export function recolorSnake(svg: string, palette: SnakePalette) {
     .join(";");
 
   return svg.replace(ROOT_VARIABLES_RE, `:root{${variables}}`);
+}
+
+export function respectReducedMotion(svg: string) {
+  return svg.replace(STYLE_END_RE, `${REDUCED_MOTION_RULE}</style>`);
 }
 
 export interface SnakePalette {

@@ -11,7 +11,7 @@ import { toDataUri } from "./image.ts";
 import { LAYOUT } from "./layout.ts";
 import type { Rect } from "./layout.ts";
 import { Profile } from "./profile.tsx";
-import { cropSnake, recolorSnake } from "./snake.ts";
+import { cropSnake, recolorSnake, respectReducedMotion } from "./snake.ts";
 import { THEMES } from "./theme.ts";
 import type { ThemeName } from "./theme.ts";
 import { createTonearmSvg } from "./tonearm.ts";
@@ -72,9 +72,8 @@ function createCanvasMask() {
 
 function createAnimatedLayers(data: ProfileData, themeName: ThemeName) {
   const { cards, cardRadius, music: musicLayout } = LAYOUT;
-  const snake = recolorSnake(
-    cropSnake(data.snake[themeName]),
-    THEMES[themeName].snake
+  const snake = respectReducedMotion(
+    recolorSnake(cropSnake(data.snake[themeName]), THEMES[themeName].snake)
   );
   const layers = [inlineSvg(snake, cards.snake)];
 
