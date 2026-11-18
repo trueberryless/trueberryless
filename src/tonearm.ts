@@ -2,9 +2,9 @@ import type { Rect } from "./layout.ts";
 
 const NEEDLE_ANGLE = (60 * Math.PI) / 180;
 const NEEDLE_RADIUS = 0.64;
-const ARM_ANGLE = (30 * Math.PI) / 180;
+const ARM_ANGLE = NEEDLE_ANGLE - Math.PI / 2;
 const ARM_LENGTH = 80;
-const REST_ROTATION = 40;
+const REST_ROTATION = -40;
 
 export function createTonearmSvg(
   card: Rect,
