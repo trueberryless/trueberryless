@@ -25,6 +25,18 @@ describe("parseSpotifyWidget", () => {
     expect(track?.title).toBe("Don't Stop");
   });
 
+  test("decodes numeric HTML entities", () => {
+    const track = parseSpotifyWidget(
+      createWidget({
+        artist: "Reol &#x2F; &#12524;&#12458;&#12523;",
+        title: "Don&#x27;t Stop",
+      })
+    );
+
+    expect(track?.artist).toBe("Reol / レオル");
+    expect(track?.title).toBe("Don't Stop");
+  });
+
   test("detects a track that is not playing anymore", () => {
     const track = parseSpotifyWidget(
       createWidget({
