@@ -10,13 +10,14 @@ export async function fetchBuffer(url: string): Promise<Buffer> {
         signal: AbortSignal.timeout(FETCH_TIMEOUT),
       });
       if (!response.ok) {
-        throw new Error(
-          `[profile] Fetching \`${url}\` failed with \`${response.status} ${response.statusText}\`.`
+        throw new FetchError(
+          `[profile] Fetching \`${url}\` failed with \`${response.status} ${response.statusText}\`.`,
+          response.status
         );
       }
       return Buffer.from(await response.arrayBuffer());
     } catch (error) {
-      if (attempt >= FETCH_ATTEMPTS) throw error;
+      if (attempt >= FETCH_ATTEMPTS || isClientError(error)) throw error;
       await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
     }
   }
@@ -61,4 +62,19 @@ interface ImageOptions {
   position?: "attention" | "centre" | "top";
   quality?: number;
   scale?: number;
+}
+
+function isClientError(error: unknown) {
+  return (
+    error instanceof FetchError && error.status >= 400 && error.status < 500
+  );
+}
+
+class FetchError extends Error {
+  constructor(
+    message: string,
+    readonly status: number
+  ) {
+    super(message);
+  }
 }

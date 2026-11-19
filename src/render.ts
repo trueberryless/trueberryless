@@ -1,7 +1,7 @@
 import { Resvg } from "@resvg/resvg-js";
 import { createElement } from "react";
 import satori from "satori";
-import type { Font } from "satori";
+import type { Font, SatoriOptions } from "satori";
 import sharp from "sharp";
 
 import type { ProfileData } from "./data.ts";
@@ -26,12 +26,19 @@ const ROOT_SVG_RE = /<svg([^>]*)>([\s\S]*)<\/svg>\s*$/;
 export async function renderProfile(
   data: ProfileData,
   themeName: ThemeName,
-  fonts: Font[]
+  fonts: Font[],
+  options?: RenderOptions
 ) {
   const { canvas } = LAYOUT;
   const staticSvg = await satori(
     createElement(Profile, { data, theme: THEMES[themeName], themeName }),
-    { fonts, ...canvas }
+    {
+      fonts,
+      ...canvas,
+      ...(options?.loadAdditionalAsset && {
+        loadAdditionalAsset: options.loadAdditionalAsset,
+      }),
+    }
   );
   const image = await rasterizeSvg(staticSvg);
   const name = `${data.bluesky.displayName} (${GITHUB_LOGIN}) on GitHub`;
@@ -126,4 +133,8 @@ function escapeXml(text: string) {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+interface RenderOptions {
+  loadAdditionalAsset?: SatoriOptions["loadAdditionalAsset"];
 }
