@@ -1,5 +1,42 @@
 {
+  "featuredOwners": [
+    {
+      "login": "withastro",
+      "mergedPullRequests": 354
+    },
+    {
+      "login": "npmx-dev",
+      "mergedPullRequests": 46
+    },
+    {
+      "login": "danielroe",
+      "mergedPullRequests": 33
+    },
+    {
+      "login": "bombshell-dev",
+      "mergedPullRequests": 19
+    },
+    {
+      "login": "all-contributors",
+      "mergedPullRequests": 18
+    },
+    {
+      "login": "changesets",
+      "mergedPullRequests": 10
+    },
+    {
+      "login": "catppuccin",
+      "mergedPullRequests": 4
+    }
+  ],
   "latestPullRequests": [
+    {
+      "mergedAt": "2026-11-18T14:56:33Z",
+      "number": 41,
+      "owner": "bombshell-dev",
+      "repository": "automation",
+      "title": "chore: migrate to changesets action v2 inputs"
+    },
     {
       "mergedAt": "2026-11-17T09:46:03Z",
       "number": 4410,
@@ -20,53 +57,19 @@
       "owner": "bombshell-dev",
       "repository": "args",
       "title": "chore: pin automation action"
-    },
-    {
-      "mergedAt": "2026-11-16T15:44:08Z",
-      "number": 1237,
-      "owner": "all-contributors",
-      "repository": "allcontributors.org",
-      "title": "docs(app): rewrite getting started"
     }
   ],
   "memberships": [
     "nuxt",
     "all-contributors",
     "bombshell-dev",
-    "withstudiocms",
     "npmx-dev",
     "singi-labs"
   ],
   "stats": {
     "contributedRepositories": 89,
-    "contributions": 3079,
-    "mergedPullRequests": 1211,
+    "contributions": 3086,
+    "mergedPullRequests": 1212,
     "reviewedPullRequests": 974
-  },
-  "topOwners": [
-    {
-      "login": "withastro",
-      "mergedPullRequests": 354
-    },
-    {
-      "login": "npmx-dev",
-      "mergedPullRequests": 46
-    },
-    {
-      "login": "danielroe",
-      "mergedPullRequests": 32
-    },
-    {
-      "login": "withstudiocms",
-      "mergedPullRequests": 26
-    },
-    {
-      "login": "all-contributors",
-      "mergedPullRequests": 18
-    },
-    {
-      "login": "bombshell-dev",
-      "mergedPullRequests": 18
-    }
-  ]
+  }
 }
