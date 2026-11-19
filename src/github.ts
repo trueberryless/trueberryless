@@ -2,7 +2,15 @@ export const GITHUB_LOGIN = "trueberryless";
 
 const API_URL = "https://api.github.com";
 const PULL_REQUEST_COUNT = 4;
-const TOP_OWNER_COUNT = 6;
+const FEATURED_OWNERS = new Set([
+  "all-contributors",
+  "bombshell-dev",
+  "catppuccin",
+  "changesets",
+  "danielroe",
+  "npmx-dev",
+  "withastro",
+]);
 const MAX_SEARCH_PAGES = 10;
 const REQUEST_TIMEOUT = 60_000;
 
@@ -78,6 +86,9 @@ export function parseGitHubActivity({
   );
 
   return {
+    featuredOwners: countPullRequestsByOwner(merged).filter(({ login }) =>
+      FEATURED_OWNERS.has(login)
+    ),
     latestPullRequests: merged
       .slice(0, PULL_REQUEST_COUNT)
       .map(({ mergedAt, number, repository, title }) => ({
@@ -98,7 +109,6 @@ export function parseGitHubActivity({
       mergedPullRequests: stats.merged.issueCount,
       reviewedPullRequests: stats.reviewed.issueCount,
     },
-    topOwners: countPullRequestsByOwner(merged).slice(0, TOP_OWNER_COUNT),
   };
 }
 
@@ -107,7 +117,7 @@ export function getAvatarLogins(activity: GitHubActivity) {
     ...new Set([
       ...activity.latestPullRequests.map(({ owner }) => owner),
       ...activity.memberships,
-      ...activity.topOwners.map(({ login }) => login),
+      ...activity.featuredOwners.map(({ login }) => login),
     ]),
   ].toSorted();
 }
@@ -196,10 +206,10 @@ async function requestGitHub<T>(token: string, path: string, body?: unknown) {
 }
 
 export interface GitHubActivity {
+  featuredOwners: Array<{ login: string; mergedPullRequests: number }>;
   latestPullRequests: MergedPullRequest[];
   memberships: string[];
   stats: GitHubStats;
-  topOwners: Array<{ login: string; mergedPullRequests: number }>;
 }
 
 interface GitHubStats {

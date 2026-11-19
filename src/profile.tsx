@@ -86,7 +86,7 @@ export function Profile({ data, theme, themeName }: ProfileProps) {
       <OwnersCard
         avatars={data.avatars}
         glass={glass}
-        owners={data.github.topOwners}
+        owners={data.github.featuredOwners}
       />
       <Glass context={glass} rect={cards.snake} tint={theme.solidTint} />
       <div
@@ -477,7 +477,7 @@ function OwnersCard({
 }: {
   avatars: Map<string, string>;
   glass: GlassContext;
-  owners: ProfileData["github"]["topOwners"];
+  owners: ProfileData["github"]["featuredOwners"];
 }) {
   const { theme } = glass;
   const [first, ...rest] = owners;

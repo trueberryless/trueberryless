@@ -34,17 +34,19 @@ describe("parseGitHubActivity", () => {
     ]);
   });
 
-  test("counts merged pull requests by owner", () => {
-    const { topOwners } = parseGitHubActivity(
+  test("counts merged pull requests of the featured owners", () => {
+    const { featuredOwners } = parseGitHubActivity(
       createData([
         ["npmx-dev", "2026-11-01"],
         ["withastro", "2026-11-02"],
         ["withastro", "2026-11-03"],
         ["bombshell-dev", "2026-11-04"],
+        ["withstudiocms", "2026-11-05"],
+        ["withstudiocms", "2026-11-06"],
       ])
     );
 
-    expect(topOwners).toEqual([
+    expect(featuredOwners).toEqual([
       { login: "withastro", mergedPullRequests: 2 },
       { login: "bombshell-dev", mergedPullRequests: 1 },
       { login: "npmx-dev", mergedPullRequests: 1 },
