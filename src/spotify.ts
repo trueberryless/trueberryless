@@ -6,10 +6,9 @@ const ARTIST_RE = /<div class="song">([^<]*)<\/div>/;
 const COVER_RE =
   /<img src="data:image\/[a-z]+;base64,\s*([^"]+)"[^>]*class="cover"/;
 const NOW_PLAYING_RE = /Now playing on/;
-const HTML_ENTITY_RE = /&(amp|lt|gt|quot|#39|apos);/g;
+const HTML_ENTITY_RE = /&(?:#(\d+)|#x([\da-f]+)|(amp|apos|gt|lt|quot));/gi;
 
 const HTML_ENTITIES = new Map([
-  ["#39", "'"],
   ["amp", "&"],
   ["apos", "'"],
   ["gt", ">"],
@@ -34,7 +33,12 @@ export function parseSpotifyWidget(svg: string): SpotifyTrack | undefined {
 function decodeHtmlEntities(text: string) {
   return text.replaceAll(
     HTML_ENTITY_RE,
-    (entity, name: string) => HTML_ENTITIES.get(name) ?? entity
+    (entity, decimal?: string, hex?: string, name?: string) => {
+      if (decimal) return String.fromCodePoint(Number(decimal));
+      if (hex) return String.fromCodePoint(Number.parseInt(hex, 16));
+
+      return HTML_ENTITIES.get(name?.toLowerCase() ?? "") ?? entity;
+    }
   );
 }
 
