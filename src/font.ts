@@ -16,8 +16,23 @@ const FONTS = [
     weight: 600,
   },
   {
+    name: "Mona Sans",
+    path: require.resolve("@fontsource/mona-sans/files/mona-sans-latin-ext-400-normal.woff"),
+    weight: 400,
+  },
+  {
+    name: "Mona Sans",
+    path: require.resolve("@fontsource/mona-sans/files/mona-sans-latin-ext-600-normal.woff"),
+    weight: 600,
+  },
+  {
     name: "Hubot Sans",
     path: require.resolve("@fontsource/hubot-sans/files/hubot-sans-latin-800-normal.woff"),
+    weight: 800,
+  },
+  {
+    name: "Hubot Sans",
+    path: require.resolve("@fontsource/hubot-sans/files/hubot-sans-latin-ext-800-normal.woff"),
     weight: 800,
   },
   {

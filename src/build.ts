@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 
 import { createProfileData } from "./data.ts";
+import { createAssetLoader } from "./fallback.ts";
 import { loadFonts } from "./font.ts";
 import { renderProfile } from "./render.ts";
 import {
@@ -30,12 +31,14 @@ const [data, fonts] = await Promise.all([
   loadFonts(),
 ]);
 
+const loadAdditionalAsset = createAssetLoader();
+
 await mkdir(DIST_DIR, { recursive: true });
 await Promise.all([
   ...THEME_NAMES.map(async (themeName) =>
     writeFile(
       new URL(`profile-${themeName}.svg`, DIST_DIR),
-      await renderProfile(data, themeName, fonts)
+      await renderProfile(data, themeName, fonts, { loadAdditionalAsset })
     )
   ),
   writeFile(new URL("index.html", DIST_DIR), createPreviewHtml()),
